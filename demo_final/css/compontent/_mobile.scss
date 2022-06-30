@@ -1,0 +1,92 @@
+/*----------預設css勿刪------------*/
+.mobile{
+	width: 600px;
+	height: 894px;
+	display: block;
+	position: relative;
+	background: url(../images/mobile.png) no-repeat center 0;
+	margin: 0 auto;
+}
+.viewport{
+	width: 347px;
+	height: 710px;
+	display: block;
+	position: relative;
+	left: 96px;
+	top: 86px;
+	border-radius: 0 0 25px 25px;
+	overflow: hidden;
+	
+}
+/*----------預設css勿刪------------*/
+.viewport .header{
+	width: 100%;
+	height: 60px;
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 11;
+	background: url(../images/mobile_header.png) repeat-x center 0;
+	background-size: contain;
+}
+.viewport .header img{
+	width: 100%;
+	height: auto;
+}
+.mobilemenu_bt{
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: 60px;
+	height: 60px;
+	display: block;
+	z-index: 14;
+}
+.mobilemenu{
+	position: absolute;
+	top: 0;
+	left: -100%;
+	transition: all .5s ease;
+	width: 100%;
+	z-index: 13;
+}
+.mobilemenu img{
+	width: 100%;
+	height: auto;
+}
+.mobilemenu.active{
+	left:0;
+}
+
+
+.mobile_content{
+	width: 346px;
+	height: 650px;
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 60px;
+	border-radius: 0 0 25px 25px;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	z-index: 10;
+}
+.mobile_content .bg img{
+	width: 100%;
+	height: auto;
+	position: relative;
+	z-index: 9;
+}
+.mobile_slider{
+	width: 100%;
+	position: absolute;
+	z-index: 10;
+	text-align: center;
+}
+.mobile_slider img{
+	width: 100%;
+}
+.mobile_slider .slick-dots{
+	bottom: 30px;
+	position: relative;
+}

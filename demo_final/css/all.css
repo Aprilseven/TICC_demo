@@ -1,0 +1,265 @@
+@charset "UTF-8";
+#title_1 {
+  -webkit-transition: all 0.8;
+  transition: all 0.8;
+}
+
+.header {
+  z-index: 1;
+}
+
+.header_btn {
+  cursor: pointer;
+}
+
+.content .header {
+  overflow: inherit;
+  z-index: 10000;
+}
+
+.content .header .menu_po_content {
+  -webkit-transition: all 0.5;
+  transition: all 0.5;
+  position: relative;
+  cursor: pointer;
+  z-index: 99;
+}
+
+.content .header .menu_po {
+  -webkit-transition: all 0.5;
+  transition: all 0.5;
+}
+
+.content .header .menu_po_js {
+  top: 0;
+  display: none;
+  height: 684px;
+  -webkit-transition: all 0.5;
+  transition: all 0.5;
+  position: absolute;
+  top: 89px;
+}
+
+.content .index_mark_pop {
+  position: absolute;
+  bottom: 0;
+  display: none;
+}
+
+.content .index_mark_pop .mark_pop_btn {
+  position: absolute;
+  cursor: pointer;
+  width: 400px;
+  top: 3500px;
+  left: 220px;
+  height: 400px;
+}
+
+.hover_img {
+  position: relative;
+  top: 1980px;
+}
+
+.hover_img .hover_img_btn {
+  cursor: pointer;
+}
+
+.hover_img img {
+  position: absolute;
+  /* CSS3淡出淡入效果,1秒 */
+  -webkit-transition: opacity 1s ease-in-out;
+  -webkit-transition: opacity 0.5s ease-in-out;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.hover_img img:last-child:hover {
+  opacity: 0;
+}
+
+.show_video_btn {
+  position: absolute;
+  cursor: pointer;
+  width: 350px;
+  top: 200px;
+  right: 300px;
+  z-index: 99;
+  height: 350px;
+}
+
+.video_btn {
+  position: absolute;
+  cursor: pointer;
+  width: 100px;
+  height: 100px;
+  top: -250px;
+  right: 10px;
+}
+
+.video_content {
+  display: none;
+  margin-top: -250px;
+}
+
+img {
+  -webkit-transition: all 0.5;
+  transition: all 0.5;
+}
+
+.block_warming {
+  -webkit-transition: all 0.5;
+  transition: all 0.5;
+}
+
+.block1 {
+  background: -webkit-gradient(linear, left top, right top, from(#063857), to(#1a84d5));
+  background: linear-gradient(90deg, #063857, #1a84d5);
+}
+
+.hidden-img {
+  position: absolute;
+  width: 500px;
+  height: 200px;
+  margin-top: 15rem;
+  opacity: 0.8;
+  margin-left: 23rem;
+}
+
+.warming_btn {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  z-index: 1000;
+  cursor: pointer;
+}
+
+video {
+  width: 100vw;
+}
+
+div.nota {
+  width: 100%;
+  height: 400px;
+  background-color: #000;
+  color: #fff;
+}
+
+div.nota.transparente {
+  height: 400px;
+  background-color: rgba(255, 255, 255, 0);
+}
+
+.frontbg {
+  background-color: rgba(0, 0, 0, 0.5);
+  height: 700px;
+  width: 100vw;
+  
+  
+}
+
+.frontbg h1 {
+  text-align: center;
+  width: 100%;
+  font-size: 60px;
+}
+
+.bg3 {
+  height: 800px;
+  width: 100vw;
+  background-color: #3a3232;
+}
+
+.block_carousel {
+  width: 1200px;
+}
+
+.carousel_btn_left {
+  display: none;
+  cursor: pointer;
+  width: 300px;
+  height: 160px;
+  position: absolute;
+  z-index: 10;
+  top: 280px;
+}
+
+.carousel_btn_left img {
+  margin-left: 10px;
+}
+
+.carousel_btn_right {
+  display: none;
+  cursor: pointer;
+  width: 300px;
+  height: 160px;
+  position: absolute;
+  z-index: 10;
+  right: 0;
+  top: 280px;
+}
+
+.carousel_btn_right img {
+  margin-left: 240px;
+}
+
+.block_carousel_imgBtnList {
+  width: 100%;
+  top: 450px;
+  height: 60px;
+  position: absolute;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
+.block_carousel_content {
+  margin: 0 auto;
+  height: 600px;
+  width: 600%;
+  margin-left: -3000px;
+  overflow: hidden;
+  position: relative;
+  background-size: 200%;
+  background-image: url(../images/index_img/index_guide02.png);
+  background-position: center;
+  background-repeat: no-repeat;
+  -webkit-transition: all 0.5s;
+  transition: all 0.5s;
+}
+
+.front2 {
+  opacity: 0;
+  -webkit-transition: all 0.5s;
+  transition: all 0.5s;
+}
+
+.front3 {
+  opacity: 0;
+  text-align: center;
+  width: 100%;
+  -webkit-transition: all 0.5s;
+  transition: all 0.5s;
+}
+
+.multiple {
+  width: 1180px;
+  margin: 0 auto;
+}
+
+.multiple-items {
+  margin-top: 5rem;
+}
+
+.multiple-items .box {
+  margin-top: 3rem;
+  padding: 2rem 1rem;
+  background-color: #fff;
+}
+
+.multiple-items .box :hover {
+  -webkit-filter: brightness(120%);
+          filter: brightness(120%);
+}
+/*# sourceMappingURL=all.css.map */

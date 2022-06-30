@@ -1,0 +1,45 @@
+.slider{
+  text-align: center;
+}
+.slick-prev,.slick-next{
+  width: 40px !important;
+  height: 60px !important;
+}
+.slick-prev{
+  background: url(../images/basic/arrow_left.png) no-repeat 0 0;
+}
+.slick-prev:hover,.slick-prev:focus{
+  background:#000 url(../images/basic/arrow_left_.png) no-repeat 0 0;
+}
+.slick-next{
+  background: url(../images/basic/arrow_right.png) no-repeat 0 0;
+}
+.slick-next:hover,.slick-next:focus{
+  background:#000 url(../images/basic/arrow_right_.png) no-repeat 0 0;
+}
+.slick-dots{
+  width: auto;
+  display: inline-block;
+  padding: 0;
+  /*以下自行設定*/
+  bottom: 80px;
+}
+.slick-dots li{
+  width: 15px;
+  height: 15px;
+  margin: 0 10px;
+  background: #ccc;
+  border-radius: 50%;
+}
+.slick-dots li:hover{
+  background: #fff;
+}
+.slick-dots li.slick-active{
+  background: #222;
+}
+.mobile .slick-prev{
+  left: 0;
+}
+.mobile .slick-next{
+  right: 0;
+}

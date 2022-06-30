@@ -1,0 +1,261 @@
+/*----------預設css勿刪------------*/
+@import "reset.scss";
+@import "slider.scss";
+@import "mobile.scss";
+
+/*--------背景--------*/
+body{
+  background: #ccc;
+}
+a{
+  border: 1px solid red;
+}
+/*--------網頁外框--------*/
+.wrap{
+  margin: 0 auto;
+  overflow: hidden;
+  position: relative; 
+  z-index: 9; 
+  /*以下自行設定*/
+  width: 1200px;/*一定要設定寬度*/
+  background:#fff; 
+}
+/*----往下滾跑出的banner----*/
+.fixedheader{
+  width: 100vw;
+  position: fixed;
+  text-align: center;
+  z-index: 15;
+  box-shadow: 0 5px 5px rgba(0,0,0,.2);
+  background: #fff;
+  transition: all 1s;
+}
+/*----fatfooter----*/
+
+.fatfooter .fatfooter_text{
+  /*----一開始的狀態----*/
+  display: none;
+}
+/*----footer----*/
+
+/*----scrollToTop----*/
+.scrollToTop{
+  position: fixed;
+  width: 58px;
+  height: 58px;
+  z-index: 12;
+  bottom: 10px;
+  right: 10px;
+}
+/*----左右快速選單----*/
+.quickmenu{
+  position: fixed;
+  top: 172px;
+  z-index: 13;
+}
+.quickmenu>a {
+  display: flex;
+  text-decoration: none;
+  position: relative;
+  height: 50px;
+  transition: all 1s ease;
+}
+
+.quickmenu .icon {
+  position: absolute;
+  transition: all 1s;
+  width: 50px;
+}
+.quickmenu .iconText {
+  transition: all 1s ease, opacity .6s ease-in-out;
+  opacity: 0;
+}
+.quickmenu>a:hover .iconText {
+  display: block;
+  opacity: 1;
+  margin-left: 0;
+  margin-right: 0;
+}
+.quickmenu.right>a{
+  justify-content: flex-end;
+}
+.quickmenu.left>a:hover .iconText {
+  margin-left: 60px;
+}
+.quickmenu.right>a:hover .iconText {
+  margin-right: 60px;
+}
+
+/*----header----*/
+header{
+  height: 172px;
+  background: url(../images/header.jpg) no-repeat 0 0;
+  position: relative;
+}
+header .logo{
+  position: absolute;
+  left: 80px;
+  top: 20px;
+  width: 300px;
+  height: 80px;
+}
+.megamenu_bt{
+  position: absolute;
+  z-index: 16;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 70px;
+}
+.megamenu{
+  position: absolute;
+  z-index: 14;
+  top: 172px;
+  display: none;
+}
+.search_bt{
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 168px;
+  height: 85px;
+}
+.search{
+  position: absolute;
+  z-index: 15;
+  top: 85px;
+  right: 50px;
+  opacity: 0;
+  transition: all .5s ease;
+}
+.search.active{
+  opacity: 1;
+}
+
+
+/*----內容開始----*/
+.content{
+  position: relative;
+  z-index: 11;
+}
+.content>div{
+  position: relative;
+  overflow:hidden
+}
+/*--------block_carousel--------*/
+.block_carousel{
+  height: 430px;
+  //background-color: rgb(169, 161, 161);
+ 
+}
+
+/*--------block2--------*/
+.block2{
+  height: 430px;
+  background: url(../images/block2.jpg) no-repeat 0 0;
+}
+.block2>ul{
+  position: absolute;
+  left: 76px;
+  top: 162px;
+}
+/*--------block3--------*/
+.block3{
+  height: 520px;
+  background: url(../images/block3.jpg) no-repeat 0 0;
+}
+.block3>img{
+  position: absolute;
+  left: 76px;
+  top: 110px;
+  z-index: 9;
+}
+/*--------block4--------*/
+.block4{
+  height: 760px;
+  background: url(../images/block4.jpg) no-repeat 0 0;
+}
+.block4>ul{
+  position: absolute;
+  left: 76px;
+  top: 128px;
+}
+/*--------block5--------*/
+.block5{
+  height: 580px;
+  background: url(../images/block5.jpg) no-repeat 0 0;
+}
+.block5>img{
+  position: absolute;
+  left: 76px;
+  top: 96px;
+}
+/*--------block6--------*/
+.block6{
+  height: 540px;
+  background: url(../images/block6.jpg) no-repeat 0 0;
+}
+.block6>ul{
+  position: absolute;
+  left: 76px;
+  top: 110px;
+}
+/*--------block7--------*/
+.block7{
+  height: 241px;
+  background: url(../images/block7.jpg) no-repeat ;
+  background-attachment: fixed; 
+  background-position :  center top;
+}
+.block7>img{
+  position: absolute;
+  left: 76px;
+  top: 34px;
+}
+.mutiSlider{
+  margin: 0 76px;
+  padding-top: 34px;
+}
+.mutiSlider>ul{
+  padding: 0 80px;
+}
+.mutiSlider .slick-dots{
+  position: relative;
+  left: auto;
+  bottom: -20px;
+}
+.lightbox_bt{
+  width: 50%;
+  height: 50%;
+  display: block;
+  margin-top: 0;
+  margin: 30px auto;
+}
+.lightbox{
+  width: 70%;
+  max-height: 80%;
+  position: fixed;
+  left: 15%;
+  top: 10%;
+  z-index: 18;
+  display: none;
+}
+.lightbox img{
+  width: 100%;
+  height: auto;
+  position: relative;
+  z-index: 18;
+}
+.lightbox:before{
+  content: "";
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background:#000;
+  opacity: .8;
+  z-index: 17;
+}

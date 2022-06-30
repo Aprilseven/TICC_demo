@@ -1,0 +1,120 @@
+.items {
+  display: -webkit-box;
+  display: flex;
+  -webkit-box-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+          align-items: center;
+  width: 1200px;
+  height: 1118px;
+  overflow: hidden;
+  
+}
+.items__inner {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  height: 1118px;
+  
+}
+.items__layer .items__item {
+  position: absolute;
+  /*box-shadow: 0 32px 40px -20px rgba(0, 0, 0, 0.25);*/
+}
+
+
+.items__layer .items__item:after {
+  content: attr(data-title);
+  position: absolute;
+  line-height: 20px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  -webkit-transition: all .5s ease;
+  transition: all .5s ease;
+  visibility: hidden;
+  opacity: 0;
+}
+.items__layer .items__item:hover:after {
+  visibility: visible;
+  opacity: 1;
+}
+.items__layer:nth-child(1) .items__item {
+  top: 200px;
+  left: 120px;
+  z-index:998;
+  
+  
+  
+}
+.items__layer:nth-child(1) .items__item:after {
+  top: -50px;
+  left: 0;
+  
+}
+.items__layer:nth-child(2) .items__item {
+  top: 440px;
+  left: 400px;
+  z-index:997;
+  
+}
+.items__layer:nth-child(2) .items__item:after {
+  bottom: -23px;
+  right: 0;
+  
+}
+.items__layer:nth-child(3) .items__item {
+position:absolute;
+  top: 600px;
+  left: 160px;
+  width: 300px;
+  height: 300px;
+  
+}
+.items__layer:nth-child(3) .items__item:after {
+  bottom: -23px;
+  left: 0;
+  color: #366C6F;
+}
+.items__layer:nth-child(4) .items__item {
+  top: 100px;
+  left: 400px;
+  
+  
+}
+.items__layer:nth-child(4) .items__item:after {
+  top: -23px;
+  right: 0;
+  color: #d0d8d2;
+}
+.items__layer:nth-child(5) .items__item {
+  top: 300px;
+  left: 300px;
+  width: 200px;
+  height: 200px;
+  
+}
+.items__layer:nth-child(5) .items__item:after {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 20px;
+  line-height: 20px;
+  margin: auto;
+  text-align: center;
+  color: #c69891;
+}
+
+.items_01 {
+  width: 1200px;
+  height: 1000px;
+  overflow: hidden;
+  background-color:#ff468f;
+}
+
+.location{
+	position:absolute;
+	top:400px;
+	left:800px;
+	}
