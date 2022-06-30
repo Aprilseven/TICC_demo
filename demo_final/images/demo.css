@@ -1,0 +1,720 @@
+/*----------預設css勿刪------------*/
+@import "file:///Macintosh HD/Users/u0095031/Desktop/公司檔案/2022case/20220429_111年台北國際會議中心網站建置TICC/html_en/css/reset.css";
+@import "file:///Macintosh HD/Users/u0095031/Desktop/公司檔案/2022case/20220429_111年台北國際會議中心網站建置TICC/html_en/css/slider.css";
+@import "file:///Macintosh HD/Users/u0095031/Desktop/公司檔案/2022case/20220429_111年台北國際會議中心網站建置TICC/html_en/css/mobile.css";
+
+/*--------背景--------*/
+body{
+  background: #ccc;
+}
+/*a{
+  border: 1px solid red;
+}*/
+/*--------網頁外框--------*/
+.wrap{
+  margin: 0 auto;
+  overflow: hidden;
+  position: relative; 
+  z-index: 9; 
+  /*以下自行設定*/
+  width: 1440px;定要設定寬度*/
+  background:#fff; 
+}
+/*----往下滾跑出的banner----*/
+.fixedheader{
+  width: 100vw;
+  position: fixed;
+  text-align: center;
+  z-index: 15;
+  box-shadow: 0 5px 5px rgba(0,0,0,.2);
+  background: #fff;
+  transition: all 1s;
+}
+/*----fatfooter----*/
+/* .fatfooter{}
+.fatfooter .fatfooter_btn{} */
+.fatfooter .fatfooter_text{
+  /*----一開始的狀態----*/
+  display: none;
+}
+/*----footer----*/
+/* .footer{} */
+/*----scrollToTop----*/
+.scrollToTop{
+  position: fixed;
+  width: 58px;
+  height: 58px;
+  z-index: 12;
+  bottom: 10px;
+  right: 10px;
+}
+/*----左右快速選單----*/
+.quickmenu{
+  position: fixed;
+  top: 300px;
+  z-index: 13;
+}
+.quickmenu>a {
+  display: flex;
+  text-decoration: none;
+  position: relative;
+  height: 50px;
+  transition: all 1s ease;
+}
+/* .quickmenu>a:hover {
+} */
+.quickmenu .icon {
+  position: absolute;
+  transition: all 1s;
+  width: 101px;
+  height:121px;
+  margin-right:15px;
+}
+
+.quickmenu .iconText {
+  transition: all 1s ease, opacity .6s ease-in-out;
+  opacity: 0;
+}
+.quickmenu>a:hover .iconText {
+  display: block;
+  opacity: 1;
+  margin-left: 0;
+  margin-right: 0;
+}
+.quickmenu.right>a{
+  justify-content: flex-end;
+}
+.quickmenu.left>a:hover .iconText {
+  margin-left: 60x;
+}
+.quickmenu.right>a:hover .iconText {
+  margin-right: 60px
+}
+
+/*----header----*/
+header{
+  height: 172px;
+  /* background: url(../images/header.jpg) no-repeat 0 0; */
+  position: relative;
+}
+header .logo{
+  position: absolute;
+  left: 80px;
+  top: 20px;
+  width: 300px;
+  height: 80px;
+}
+.megamenu_bt{
+  position: absolute;
+  z-index: 16;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 70px;
+}
+.megamenu{
+  position: absolute;
+  z-index: 14;
+  top: 172px;
+  display: none;
+}
+.search_bt{
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 168px;
+  height: 85px;
+}
+.search{
+  position: absolute;
+  z-index: 15;
+  top: 85px;
+  right: 50px;
+  opacity: 0;
+  transition: all .5s ease;
+}
+.search.active{
+  opacity: 1;
+}
+
+
+/*----內容開始----*/
+.content{
+  position: relative;
+  z-index: 11;
+}
+.content>div{
+  position: relative;
+  overflow:hidden
+}
+
+.block_warming{
+	height: 196px;
+	}
+
+
+.block1{
+	height: 771;
+	}
+/*--------block2--------*/
+.block2{
+  height: 4000px;
+   /* background: url(../images/index_bg.jpg) no-repeat 0 0; */
+  background: url(file:///Macintosh%20HD/Users/u0095031/Desktop/%E5%85%AC%E5%8F%B8%E6%AA%94%E6%A1%88/2022case/20220429_111%E5%B9%B4%E5%8F%B0%E5%8C%97%E5%9C%8B%E9%9A%9B%E6%9C%83%E8%AD%B0%E4%B8%AD%E5%BF%83%E7%B6%B2%E7%AB%99%E5%BB%BA%E7%BD%AETICC/html_en/images/white_bg.jpg) no-repeat 0 0;
+}
+.block2>ul{
+  position: absolute;
+  left: 76px;
+  top: 162px;
+}
+/*--------block3--------*/
+.block3{
+  height: 4836px;
+  background: url(file:///Macintosh%20HD/Users/u0095031/Desktop/%E5%85%AC%E5%8F%B8%E6%AA%94%E6%A1%88/2022case/20220429_111%E5%B9%B4%E5%8F%B0%E5%8C%97%E5%9C%8B%E9%9A%9B%E6%9C%83%E8%AD%B0%E4%B8%AD%E5%BF%83%E7%B6%B2%E7%AB%99%E5%BB%BA%E7%BD%AETICC/html_en/images/ec_black_03bg_w.png) no-repeat 0 0;
+}
+.block3>img{
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  z-index: 9;
+}
+/*--------block4--------*/
+.block4{
+  height: 993px;
+  background: url(file:///Macintosh%20HD/Users/u0095031/Desktop/%E5%85%AC%E5%8F%B8%E6%AA%94%E6%A1%88/2022case/20220429_111%E5%B9%B4%E5%8F%B0%E5%8C%97%E5%9C%8B%E9%9A%9B%E6%9C%83%E8%AD%B0%E4%B8%AD%E5%BF%83%E7%B6%B2%E7%AB%99%E5%BB%BA%E7%BD%AETICC/html_en/images/ec_black_04bg_w.png) no-repeat 0 0;
+}
+.block4>ul{
+  position: absolute;
+  left: 76px;
+  top: 128px;
+}
+/*--------block5--------*/
+.block5{
+  height: 1118px;
+  background: url(file:///Macintosh%20HD/Users/u0095031/Desktop/%E5%85%AC%E5%8F%B8%E6%AA%94%E6%A1%88/2022case/20220429_111%E5%B9%B4%E5%8F%B0%E5%8C%97%E5%9C%8B%E9%9A%9B%E6%9C%83%E8%AD%B0%E4%B8%AD%E5%BF%83%E7%B6%B2%E7%AB%99%E5%BB%BA%E7%BD%AETICC/html_en/images/ec_black_05bg_w.png) no-repeat 0 0;
+}
+.block5>img{
+  position: absolute;
+  left: 76px;
+  top: 96px;
+}
+/*--------block6--------*/
+.block6{
+  height: 1761px;
+  background: url(file:///Macintosh%20HD/Users/u0095031/Desktop/%E5%85%AC%E5%8F%B8%E6%AA%94%E6%A1%88/2022case/20220429_111%E5%B9%B4%E5%8F%B0%E5%8C%97%E5%9C%8B%E9%9A%9B%E6%9C%83%E8%AD%B0%E4%B8%AD%E5%BF%83%E7%B6%B2%E7%AB%99%E5%BB%BA%E7%BD%AETICC/html_en/images/ec_black_06bg_w.png) no-repeat 0 0;
+}
+.block6>ul{
+  position: absolute;
+  left: 76px;
+  top: 110px;
+}
+/*--------block7--------*/
+.block7{
+  height: 1551px;
+  background: url(file:///Macintosh%20HD/Users/u0095031/Desktop/%E5%85%AC%E5%8F%B8%E6%AA%94%E6%A1%88/2022case/20220429_111%E5%B9%B4%E5%8F%B0%E5%8C%97%E5%9C%8B%E9%9A%9B%E6%9C%83%E8%AD%B0%E4%B8%AD%E5%BF%83%E7%B6%B2%E7%AB%99%E5%BB%BA%E7%BD%AETICC/html_en/images/ec_black_07bg.jpg) no-repeat  ;
+  background-attachment: fixed; 
+  background-position :  center top;
+}
+.block7>img{
+  position: absolute;
+  left: 76px;
+  top: 34px;
+}
+.mutiSlider{
+  margin: 0 76px;
+  padding-top: 34px;
+}
+.mutiSlider>ul{
+  padding: 0 80px;
+}
+.mutiSlider .slick-dots{
+  position: relative;
+  left: auto;
+  bottom: -20px;
+}
+.lightbox_bt{
+  width: 50%;
+  height: 50%;
+  display: block;
+  margin-top: 0;
+  margin: 30px auto;
+}
+.lightbox{
+  width: 70%;
+  max-height: 80%;
+  position: fixed;
+  left: 15%;
+  top: 10%;
+  z-index: 18;
+  display: none;
+}
+.lightbox img{
+  width: 100%;
+  height: auto;
+  position: relative;
+  z-index: 18;
+}
+.lightbox:before{
+  content: "";
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background:#000;
+  opacity: .8;
+  z-index: 17;
+}
+
+/*--------我自己設定-------*/
+
+
+
+/*--------block_warming--------*/
+.warming{
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1200px;
+  height: 196px;
+  z-index:999;
+}
+
+.block_warming{
+	transition: all 0.5s;
+}
+
+/*--------block01--------*/
+
+.header{
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1440px;
+  height: 272x;
+  z-index:999;
+}
+
+
+.index_header_set{
+	position: absolute;
+	right: 0px;
+	top: 550px;
+	z-index: 999;
+	
+}
+
+.hero_txt02{
+	position: absolute;
+	left: 322px;
+	top: 155px;
+	z-index: 998;
+	display:none;
+	
+}
+
+.viedo_mark{
+	position: absolute;
+	left: 0px;
+	/* top: 91px; */
+	top:0px;
+	z-index: 997;
+}
+.viedo_mark img{
+	height: 960px;
+	width: 100%;
+}
+
+.menu_pop{
+	position: absolute;
+	left: 0px;
+	top: 155px;
+	z-index: 998;
+}
+
+.mark_pop{
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	z-index: 999;
+}
+
+
+.viedo{
+	position: absolute;
+	left: 508px;
+	top: 263px;
+	z-index: 998;
+}
+
+
+/*--------block02--------*/
+
+
+.index_guide{
+	position: absolute;
+	left: -403px;
+	top: 193px;
+	z-index: 99;
+}
+
+
+.index_event{
+	position: absolute;
+	left:0px;
+	top: 165px;
+	z-index: 99;
+}
+
+.index_event_btn{
+	position: absolute;
+	left: 1000px;
+	top: 700px;
+	width: 300px;
+	height: 200px;
+	z-index: 99;
+	border: #DF1E21 solid 1px;
+} 
+
+
+
+
+.index_VRbanner{
+	position: absolute;
+	left: 0px;
+	top: 950px;
+	z-index: 97;
+}
+
+.index_event_txt{
+	position: absolute;
+	left: 390px;
+	top: 120px;
+	z-index: 99;
+}
+
+
+
+.index_hot{
+	position: absolute;
+	left: 0px;
+	top: 1710px;
+	z-index: 99;
+}
+
+.index_events_btn{
+	position: absolute;
+	left: 486px;
+	top: 1976px;
+	z-index: 99;
+}
+
+
+
+
+/*--------More inspiring ideas-------*/
+
+
+
+.ec_b4_txt01{
+	position: absolute;
+	left: 86px;
+	top: 1px;
+}
+
+.ec_b4_txt02{
+	position: absolute;
+	left: 74px;
+	top: 305px;
+	
+}
+
+.ec_b4_txt03{
+	position: absolute;
+	left: 74px;
+	top: 305px;
+	display:none;
+	
+}
+
+.ec_b4_pic01{
+	position: absolute;
+	left: 715px;
+	top: 562px;
+}
+
+
+.ec_b4_pic02{
+	position: absolute;
+	left: 448px;
+	top: 240px;
+	display:none;
+}
+
+
+.ec_b4_card01{
+	position: absolute;
+	left: 0px;
+	top: 586px;
+	z-index:99;
+	transition: all .5s ease;
+}
+
+.ec_b4_card01.active{
+	  left: -240px;
+      top: 610px;
+      transform:scale(.8);
+      opacity:0;
+}
+
+.ec_b4_card01_h{
+	position: absolute;
+	left: 0px;
+	top: 586px;
+	z-index:99;
+	transition: all .5s ease;
+	opacity:0;
+}
+
+.ec_b4_card01_h.active{
+  left: -240px;
+  top: 610px;
+  transform:scale(.8);
+  opacity:.8;
+}
+
+.ec_b4_card02{
+	position: absolute;
+	left: -200px;
+	top: 586px;
+	z-index: 98;
+	transform:scale(.6);
+	transition: all .5s ease;
+	opacity:0;
+}
+
+.ec_b4_card02.active{
+  left: 124px;
+  transform:scale(1);
+  opacity:1;
+}
+
+
+
+
+/*--------shop online-------*/
+
+
+
+.ec_b5_txt01{
+	position: absolute;
+	left: 638px;
+	top: 239px;
+}
+
+.ec_b5_txt02{
+	position: absolute;
+	left: 626px;
+	top: 108px;
+}
+
+
+
+.ec_b5_pic01{
+	position: absolute;
+	left: 168px;
+	top: 64px;
+}
+
+
+.ec_b5_line01{
+	position: absolute;
+	left: 279px;
+	top: 0px;
+}
+
+.ec_b5_card01{
+	position: absolute;
+	left: 215px;
+	top: 380px;
+}
+
+.ec_b5_card02{
+	position: absolute;
+	left: 560px;
+	top: 380px;
+}
+
+.ec_b5_card03{
+	position: absolute;
+	left: -135px;
+	top: 380px;
+}
+
+
+
+
+/*--------毛玻璃-------*/
+
+
+
+.square  {
+	position: absolute;
+	top: 150px;
+	left: 230px;
+	background: hsla(0,0%,100%,.3);
+	width: 560px;
+	height: 560px;
+	border-radius: 35px;
+	transform: rotate(58deg);
+	box-shadow: rgba(0, 0, 0, 0.1) 0px 5px 15px;
+	backdrop-filter: blur(6px);
+}
+
+
+
+
+/*--------btn-------*/
+
+.browse_bt {
+	position: absolute;
+	top: 3360px;
+	left: 490px;
+	width: 200px;
+	height: 100px;
+	display: block;
+}
+
+.products_bt {
+	position: absolute;
+	top: 300px;
+	left: 246px;
+	width: 200px;
+	height: 100px;
+	display: block;
+}
+
+
+.ideas_bt {
+	position: absolute;
+	top: 245px;
+	left: 462px;
+	width: 200px;
+	height: 100px;
+	display: block;
+}
+
+.ec_b6_card01_bt {
+	position: absolute;
+	top: 224px;
+	left: 75px;
+	width: 500px;
+	height: 500px;
+	display: block;
+	z-index:999;
+}
+
+
+.ec_b6_pic01_bt {
+	position: absolute;
+	top: 1129px;
+	left: 0px;
+	width: 510px;
+	height: 315px;
+	z-index: 997;
+	transition: all .5s ease;	
+}
+
+.ec_b6_pic01_bt.active {
+	background: rgba(255, 255, 255, 0.1);
+	backdrop-filter: blur(4px);
+}
+
+.ec_b6_txt03 {
+	position: absolute;
+	top: 1000px;
+	left: 115px;
+	z-index: 999;
+	transition: all .5s ease;
+	opacity:0;	
+}
+
+.ec_b6_txt03.active {
+	position: absolute;
+	top: 1240px;
+	left: 115px;
+	opacity:1;
+	
+}
+
+.ec_b6_sq {
+	position: absolute;
+	top: 1240px;
+	left: 95px;
+	width:100px;
+	height:100px;
+	border-radius:25px;
+	z-index: 998;
+	transition: all .5s ease;
+	background-color:#f65445;
+	transform:rotate(45deg)	;
+	opacity:0;	
+	
+	
+}
+
+.ec_b6_sq.active {
+	transition-duration:4;
+	transform:rotate(675deg);
+	opacity:1;	
+}
+
+/*--------選單毛玻璃-------*/
+
+
+.menu_bt {
+	position: absolute;
+	top: -1px;
+	left: 1px;
+	z-index: 9997;
+	width: 200px;
+	height: 100px;
+}
+
+
+.menu{
+	position: absolute;
+	top: -40px;
+	left: -700px;
+	background: hsla(0,0%,100%,.8);
+	width: 600px;
+	height: 1000px;
+	box-shadow:rgba(0, 0, 0, 0.1) 0px 5px 15px;
+	backdrop-filter: blur(9px);
+	z-index: 9998;
+	transition: all .5s ease;
+	
+}
+
+.menu.active{
+	left: 0px;
+}
+
+
+.menu_x_bt{
+	position: absolute;
+	top: 40px;
+	left: 215px;
+	z-index: 9999;
+	transition: all .5s ease;
+	transform:rotate(0deg)	;
+	opacity:0;
+}
+
+.menu_x_bt.active{
+	transition-duration:4;
+	transform:rotate(180deg);
+	opacity:1;
+}
