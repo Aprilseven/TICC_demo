@@ -1,0 +1,75 @@
+// hyui flex 預設 demo
+.modal {
+    position: fixed;
+    display: none;
+    width: 600px;
+    // height: 300px;
+    background: #FFF;
+    z-index: 99999999;
+    top: 5%;
+    left: 50%;
+    margin-left: -300px;
+    padding: 3em 1.5em 2em;
+    box-sizing: border-box;
+    border-radius:8px;
+    box-shadow:1px 1px 15px RGBA(0, 0, 0, .5);
+    animation: scaleUp .5s ease-out;
+
+    @include screen('mobile') {
+        width: 90%;
+        margin-left: -45%;
+    }
+
+    h2 {
+        padding-bottom: .5em;
+        color: #0c2577;
+    }
+    a{ padding: 0 4px; }
+
+    .close {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        width: 42px !important;
+        min-width: auto;
+        height: 42px;
+        font-size: 0em;
+        border: none;
+        display: block;
+        padding: 0;
+        background: url(../images/basic/icon_close.svg) no-repeat center center;
+        background-size: 24px 24px;
+
+        &:before, &:after{ display: none;}
+
+        &:hover, &:focus {
+            cursor: pointer;
+            background: url(../images/basic/icon_close.svg) no-repeat center center, #ddd;
+            background-size: 24px 24px;
+        }
+    }
+
+    .btn_grp{
+        padding: 0;
+    }
+}
+@keyframes scaleUp {
+    0% {
+        transform: scale(1) translateY(-50px);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1) translateY(0px);
+        opacity: 1;
+    }
+}
+.modal_overlay {
+    position: fixed;
+    display: block;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: RGBA(0, 0, 0, .5);
+    z-index: 99999998;
+}

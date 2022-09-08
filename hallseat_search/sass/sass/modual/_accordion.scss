@@ -1,0 +1,99 @@
+// .accordion {
+//     ul {
+//         list-style: none;
+//         @include li-reset;  
+//         li {
+//             margin-bottom: 0.5em;
+//             a {
+//                 display: block;
+//                 // background-color: #4b137c;
+//                 background: rgba(0,0,0,.65);
+//                 color: #fff;
+//                 text-decoration: none;
+//                 padding: .65em 1.5em;
+//                 border-radius: 3px;
+//             }
+//         }
+//     }
+//     .accordion-content {
+//         padding: 1.5em 1.25em;
+//         line-height: 1.8;
+//     }
+// }
+// 
+.accordion {
+    ul {
+        list-style: none;
+        @include li-reset;  
+        li {
+            margin-bottom: 0.5em;
+            a {
+                display: block;
+                color: $secondaryColor;
+                border-bottom: 1px solid #c0c0c0;
+                text-decoration: none;
+                padding: .65em 2.5em .65em 0;
+                font-size: 1.125em;
+                font-weight: bold;
+
+                position: relative;
+                &:after {
+                    content: "";
+                    border: 1px solid #333;
+                    border-top: none;
+                    border-left: none;
+                    position: absolute;
+                    top: 16px;
+                    right: 15px;
+                    width: 10px;
+                    height: 10px;
+                    transform: rotate(45deg);
+                    transition: transform 0.5s;
+                }
+                &.active {
+                    border-bottom: transparent;
+                    &:after {
+                        top: 20px;
+                        transform: rotate(225deg);
+                    }
+                }
+            }
+        }
+    }
+    .accordion-content {
+        padding: 1.5em 2em;
+        line-height: 1.8;
+        background: #fff;
+
+        ol, ul{ padding-left: 24px; }
+    }
+
+    &.notice{
+        background: #f0f0f0;
+        padding: 2em !important;
+        margin-top: 2em;
+        li {
+            a {
+                font-size: 1.45em;
+                font-weight: bold;
+                letter-spacing: 2px;
+                padding: 1em 2.5em 1em 0;
+                color: #222;
+
+                &:after { top: calc(50% - 8px); right: 20px;}
+                &.active {
+                    border-bottom: 1px solid #c0c0c0;
+                    &:after { top: calc(50% - 4px);}
+                }
+            }
+        }
+
+        .accordion-content { background: transparent; }
+
+        @include screen('mobile') {
+            .accordion-content{
+                padding: 1.5em 0;
+            }
+        }
+    }
+}
