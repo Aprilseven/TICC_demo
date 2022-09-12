@@ -1,0 +1,124 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Import sp13 data from excel</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.core.min.js"></script>
+  </head>
+  <body>
+    <script>
+      // This file should be in the same directory as 【討論用】TICC大會堂座位查詢、VR實境.xlsx
+      // Open this file using a server (Visual Studio Code has live server extensions) to download seat data into a .txt file
+      // Manually copy the data from the .txt file into sp13_seats.js and store it into a constant called "seats"
+      let seats,
+        filteredSeats = {};
+      const perspectiveImagePrefix = "section_";
+      const perspectiveImageSuffix = ".png";
+      /* set up XMLHttpRequest */
+
+      var filePath = "【討論用】TICC大會堂座位查詢、VR實境.xlsx";
+      var oReq = new XMLHttpRequest();
+      oReq.open("GET", filePath, true);
+      oReq.responseType = "arraybuffer";
+
+      oReq.onload = function (e) {
+        var arraybuffer = oReq.response;
+
+        var data = new Uint8Array(arraybuffer);
+        var arr = new Array();
+        for (var i = 0; i != data.length; ++i)
+          arr[i] = String.fromCharCode(data[i]);
+        var bstr = arr.join("");
+
+        var workbook = XLSX.read(bstr, {
+          type: "binary",
+        });
+
+        var first_sheet_name = workbook.SheetNames[0];
+
+        var worksheet = workbook.Sheets[first_sheet_name];
+        seats = XLSX.utils.sheet_to_json(worksheet, {
+          header: [
+            "type",
+            "row",
+            "number",
+            "isOdd",
+            "perspectiveImage",
+            "route",
+            "routeEnglish",
+            "routeImage",
+          ],
+          raw: false,
+        });
+
+        for (const seat of seats) {
+          seat.type = seat.type?.trim();
+          seat.row = seat.row?.match(/(?:\d+\.)?\d+/g)?.map((i) => Number(i));
+          seat.number = seat.number
+            ?.match(/(?:\d+\.)?\d+/g)
+            ?.map((i) => Number(i));
+          seat.perspectiveImage =
+            perspectiveImagePrefix +
+            seat.perspectiveImage?.trim() +
+            perspectiveImageSuffix;
+          seat.routeImage = seat.routeImage?.split("exit")[1]?.trim();
+          seat.isOdd = seat.isOdd?.trim() === "單" ? true : false;
+        }
+
+        filteredSeats.normalSeats = seats.filter(
+          (seat) => seat.type === "一般席"
+        );
+        filteredSeats.reservedSeats = seats.filter(
+          (seat) => seat.type === "包廂席"
+        );
+        filteredSeats.vipSeats = seats.filter((seat) => seat.type === "貴賓席");
+        filteredSeats.wheelchairSeats = seats.filter(
+          (seat) => seat.type === "輪椅席"
+        );
+
+        filteredSeats.normalSeatsMap = mapSeats(filteredSeats.normalSeats);
+        filteredSeats.reservedSeatsMap = mapSeats(filteredSeats.reservedSeats);
+
+        download(filteredSeats, "seats.txt", "text/plain");
+      };
+
+      oReq.send();
+
+      function download(content, fileName, contentType) {
+        const data = JSON.stringify(content);
+        const a = document.createElement("a");
+        const file = new Blob([data], { type: contentType });
+        a.href = URL.createObjectURL(file);
+        a.download = fileName;
+        a.click();
+      }
+
+      function mapSeats(seats) {
+        let seatsMap = new Map();
+        for (const seat of seats) {
+          const rowStart = seat.row[0];
+          const rowEnd = seat.row[1] ?? rowStart;
+          const numStart = seat.number[0];
+          const numEnd = seat.number[1];
+
+          for (let i = rowStart; i <= rowEnd; i++) {
+            if (seatsMap.has(i)) {
+              let [curNumStart, curNumEnd] = seatsMap.get(i);
+              curNumStart = curNumStart < numStart ? curNumStart : numStart;
+              curNumEnd = curNumEnd > numEnd ? curNumEnd : numEnd;
+              seatsMap.set(i, [curNumStart, curNumEnd]);
+            } else {
+              seatsMap.set(i, [numStart, numEnd]);
+            }
+          }
+        }
+        seatsMap = Object.fromEntries(seatsMap);
+        return seatsMap;
+      }
+    </script>
+  </body>
+</html>

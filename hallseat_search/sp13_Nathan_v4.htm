@@ -1,0 +1,5151 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>預約消息</title>
+    <!--HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries [if lt IE 9]>
+    <script src="js/html5shiv.js"></script>
+    <script src="js/respond.min.js"></script>
+    <![endif]-->
+    <!-- slick css-->
+    <link rel="stylesheet" type="text/css" href="vendor/slick/slick.css" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="vendor/slick/slick-theme.css"
+    />
+    <!-- 燈箱facybox -->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="vendor/fancybox/jquery.fancybox.min.css"
+    />
+    <!-- animate -->
+    <link rel="stylesheet" href="vendor/wow/animate.css" />
+    <!-- hyUI css -->
+    <link rel="stylesheet" href="css/hyui.css" />
+    <!-- favicon -->
+    <link href="images/favicon.png" rel="icon" type="image/x-icon" />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.core.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.1/gsap.min.js"></script>
+
+    <script src="sp13_seats.js"></script>
+
+    <style>
+      @media screen and (max-width: 767px) {
+        .js_minimap_container {
+          right: 43px !important;
+          width: 75px !important;
+        }
+      }
+
+      .js_svg {
+        cursor: pointer;
+      }
+
+      .js_minimap_container {
+        cursor: auto !important;
+      }
+
+      .js_minimap_draggable {
+        cursor: pointer !important;
+      }
+
+      .js_svg_img {
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -o-user-select: none;
+        user-select: none;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      $(document).ready(function () {
+        $(".js_minimap_container").on("dragstart", function (event) {
+          event.preventDefault();
+        });
+
+        // $(".js_user_typing_row").prop("disabled", true);
+        // $(".js_user_typing_number").prop("disabled", true);
+        // $(".js_user_typing_row").prop("placeholder", "");
+        // $(".js_user_typing_number").prop("placeholder", "");
+
+        // $(".seat_this").hide();
+        // $(".js_svg_zoom_in").hide();
+        // $(".js_seat_zoom_in_title").hide();
+
+        // $(".js_reserved_prefix").css({
+        //   "min-width": 0,
+        // });
+        // $(".js_wheelchair_prefix").css({
+        //   "min-width": 0,
+        // });
+        // $(".js_seat_row_span").css({
+        //   "min-width": 0,
+        // });
+        // $(".js_seat_number_span").css({
+        //   "min-width": 0,
+        // });
+
+        const xColumn = 24;
+        const xColumn2 = 22;
+        const xHallway1 = 65;
+        const xHallway2 = 55;
+        const xHallway3 = 80;
+        const yRow = 31;
+        const yRow2 = 35;
+        const yHallway = 50;
+        const centerRowNormal = 27;
+        const centerColumnNormal = 1;
+        const centerXNormal = 1356;
+        const centerYNormal = 1590;
+        const BX1Odd = 424;
+        const BY1Odd = 1634;
+        const BX1Even = 2308;
+        const BY1Even = 1634;
+        const BX2Center = 1356;
+        const BY2Center = 2698;
+        const B2CenterColumn = 1;
+        const B2CenterRow = 33;
+        const centerXVip = 1370;
+        const centerYVip = 695;
+        const vipXColumn = 33;
+        const wheelchairXColumn = -33;
+        const wheelchairYColumn = -12;
+
+        let seatX, seatY;
+
+        let curRow,
+          curNumber,
+          curType,
+          curPhoto,
+          curRoute,
+          curTitle,
+          curSeatX,
+          curSeatY,
+          curLeft,
+          curTop;
+
+        const svgWidth = 2800;
+        const svgHeight = 3200;
+        const sizeFactor = 1.5;
+
+        const zoomInWidth1 = svgWidth / Math.pow(sizeFactor, 1);
+        const zoomInWidth2 = svgWidth / Math.pow(sizeFactor, 2);
+        const zoomInWidth3 = svgWidth / Math.pow(sizeFactor, 3);
+        const zoomInWidth4 = svgWidth / Math.pow(sizeFactor, 4);
+        const zoomInHeight1 = svgHeight / Math.pow(sizeFactor, 1);
+        const zoomInHeight2 = svgHeight / Math.pow(sizeFactor, 2);
+        const zoomInHeight3 = svgHeight / Math.pow(sizeFactor, 3);
+        const zoomInHeight4 = svgHeight / Math.pow(sizeFactor, 4);
+        const zoomInWidth = zoomInWidth1;
+        const zoomInHeight = zoomInHeight1;
+        const zoomInOffsetX = svgWidth / sizeFactor / 2;
+        const zoomInOffsetY = svgHeight / sizeFactor / 2;
+        let zoomInCount = 0;
+
+        let minimapWidth, minimapHeight;
+
+        if (window.matchMedia("(max-width: 767px)").matches) {
+          minimapWidth = 71;
+          minimapHeight = 81.14;
+        } else {
+          minimapWidth = 125;
+          minimapHeight = 142.85;
+        }
+
+        const minimapDraggableWidth1 = minimapWidth / Math.pow(sizeFactor, 1);
+        const minimapDraggableWidth2 = minimapWidth / Math.pow(sizeFactor, 2);
+        const minimapDraggableWidth3 = minimapWidth / Math.pow(sizeFactor, 3);
+        const minimapDraggableWidth4 = minimapWidth / Math.pow(sizeFactor, 4);
+        const minimapDraggableHeight1 = minimapHeight / Math.pow(sizeFactor, 1);
+        const minimapDraggableHeight2 = minimapHeight / Math.pow(sizeFactor, 2);
+        const minimapDraggableHeight3 = minimapHeight / Math.pow(sizeFactor, 3);
+        const minimapDraggableHeight4 = minimapHeight / Math.pow(sizeFactor, 4);
+        const minimapZoomInWidth = minimapDraggableWidth1;
+        const minimapZoomInHeight = minimapDraggableHeight1;
+        const maxMinimapX1 = Math.ceil(minimapWidth - minimapDraggableWidth1);
+        const maxMinimapX2 = Math.ceil(minimapWidth - minimapDraggableWidth2);
+        const maxMinimapX3 = Math.ceil(minimapWidth - minimapDraggableWidth3);
+        const maxMinimapX4 = Math.ceil(minimapWidth - minimapDraggableWidth4);
+        const maxMinimapY1 = Math.ceil(minimapHeight - minimapDraggableHeight1);
+        const maxMinimapY2 = Math.ceil(minimapHeight - minimapDraggableHeight2);
+        const maxMinimapY3 = Math.ceil(minimapHeight - minimapDraggableHeight3);
+        const maxMinimapY4 = Math.ceil(minimapHeight - minimapDraggableHeight4);
+
+        const zoomInMap = new Map();
+        zoomInMap.set(0, [
+          svgWidth,
+          svgHeight,
+          0,
+          0,
+          0,
+          0,
+          minimapWidth,
+          minimapHeight,
+        ]);
+        zoomInMap.set(1, [
+          zoomInWidth1,
+          zoomInHeight1,
+          (svgWidth - svgWidth / sizeFactor) / 2,
+          (svgHeight - svgHeight / sizeFactor) / 2,
+          maxMinimapX1,
+          maxMinimapY1,
+          minimapDraggableWidth1,
+          minimapDraggableHeight1,
+        ]);
+        zoomInMap.set(2, [
+          zoomInWidth2,
+          zoomInHeight2,
+          (svgWidth - svgWidth / Math.pow(sizeFactor, 2)) / 2,
+          (svgHeight - svgHeight / Math.pow(sizeFactor, 2)) / 2,
+          maxMinimapX2,
+          maxMinimapY2,
+          minimapDraggableWidth2,
+          minimapDraggableHeight2,
+        ]);
+        zoomInMap.set(3, [
+          zoomInWidth3,
+          zoomInHeight3,
+          (svgWidth - svgWidth / Math.pow(sizeFactor, 3)) / 2,
+          (svgHeight - svgHeight / Math.pow(sizeFactor, 3)) / 2,
+          maxMinimapX3,
+          maxMinimapY3,
+          minimapDraggableWidth3,
+          minimapDraggableHeight3,
+        ]);
+        zoomInMap.set(4, [
+          zoomInWidth4,
+          zoomInHeight4,
+          (svgWidth - svgWidth / Math.pow(sizeFactor, 4)) / 2,
+          (svgHeight - svgHeight / Math.pow(sizeFactor, 4)) / 2,
+          maxMinimapX4,
+          maxMinimapY4,
+          minimapDraggableWidth4,
+          minimapDraggableHeight4,
+        ]);
+
+        const _2MF_L = "_2MF_L";
+        const _2MF_R = "_2MF_R";
+        const _3F_L = "_3F_L";
+        const _3F_R = "_3F_R";
+        const _4F_L = "_4F_L";
+        const _4F_R = "_4F_R";
+        const _5F_L = "_5F_L";
+        const _5F_R = "_5F_R";
+        const _6F_L = "_6F_L";
+        const _6F_R = "_6F_R";
+        const _L_56F = "_L_56F";
+        const _R_56F = "_R_56F";
+
+        const normalSeats = "一般席";
+        const reservedSeats = "包廂席";
+        const vipSeats = "貴賓席";
+        const wheelchairSeats = "輪椅席";
+
+        function seatImages(type, row, number) {
+          const isOdd = number % 2 === 1 ? true : false;
+          if (type === normalSeats) {
+            for (const seat of seats.normalSeats) {
+              if (
+                (row === seat.row[0] &&
+                  number >= seat.number[0] &&
+                  number <= seat.number[1] &&
+                  isOdd === seat.isOdd) ||
+                (row >= seat.row[0] &&
+                  row <= seat.row[1] &&
+                  number >= seat.number[0] &&
+                  number <= seat.number[1] &&
+                  isOdd === seat.isOdd)
+              ) {
+                if (row <= 11 && number >= 35 && isOdd) {
+                  //prettier-ignore
+                  let x = 780 - ((number - 35) / 2) * xColumn2 + (row - 4) * 6;
+                  //prettier-ignore
+                  let y = 820 + (row - 4) * yRow2 - ((number - 35) / 2) * 6;
+                  return [seat.perspectiveImage, seat.routeImage, x, y];
+                }
+                if (row <= 11 && number >= 35 && !isOdd) {
+                  //prettier-ignore
+                  let x = 1927 + ((number - 36) / 2) * xColumn2 - (row - 4) * 1;
+                  //prettier-ignore
+                  let y = 820 + (row - 4) * yRow2 - ((number - 36) / 2) * 8;
+                  return [seat.perspectiveImage, seat.routeImage, x, y];
+                }
+
+                if (row >= 14 && row <= 27 && number >= 35 && isOdd) {
+                  let x = 755 - ((number - 35) / 2) * xColumn2;
+                  let y = 1155 + (row - 14) * yRow2 - ((number - 35) / 2) * 4;
+
+                  if (row === 15) {
+                    x += 10;
+                  }
+                  if (row >= 17 && row <= 20) {
+                    x += 20;
+                    y -= (row - 17) * 4;
+                    x -= ((row - 17) / 2) * 20;
+                  }
+                  if (row >= 21 && row <= 25) {
+                    x += 5 + ((row - 21) / 2) * 28;
+                    y -= 20;
+                  }
+                  if (row >= 26) {
+                    x += ((row - 21) / 2) * 28 - 8;
+                    y -= 20;
+                  }
+                  return [seat.perspectiveImage, seat.routeImage, x, y];
+                }
+
+                if (row >= 14 && row <= 27 && number >= 35 && !isOdd) {
+                  let x = 1980 + ((number - 36) / 2) * xColumn;
+                  let y = 1155 + (row - 14) * yRow2 - ((number - 36) / 2) * 4;
+                  const isRowOdd = row % 2 === 1 ? true : false;
+
+                  if (row === 15) x -= 10;
+
+                  if (row >= 16 && row <= 27 && isRowOdd) {
+                    x -= 45;
+                    x -= ((row - 17) / 2) * 5;
+                    y -= ((row - 17) / 2) * 4;
+                  }
+                  if (row >= 16 && row <= 27 && !isRowOdd) {
+                    x -= 30;
+                    x -= ((row - 16) / 2) * 5;
+                    y -= ((row - 16) / 2) * 4;
+                  }
+                  if (row === 22 && number === 52) {
+                    x = 2130;
+                    y = 1390;
+                  }
+                  if (row === 22 && number === 54) {
+                    x = 2165;
+                    y = 1385;
+                  }
+                  if (row === 23 && number === 54) {
+                    x = 2140;
+                    y = 1420;
+                  }
+                  if (row === 23 && number === 56) {
+                    x = 2175;
+                    y = 1415;
+                  }
+                  if (row === 24 && number === 54) {
+                    x = 2150;
+                    y = 1450;
+                  }
+                  if (row === 25 && number === 56) {
+                    x = 2160;
+                    y = 1480;
+                  }
+                  return [seat.perspectiveImage, seat.routeImage, x, y];
+                }
+
+                let x = Math.ceil((number - centerColumnNormal) / 2) * xColumn;
+                let y = (row - centerRowNormal) * yRow;
+                if (isOdd) x = -x;
+                x += centerXNormal;
+                y += centerYNormal;
+
+                if (row <= 27 && number <= 34) {
+                  if (row <= 12) y -= yHallway;
+                  if (number >= 11 && isOdd) x -= xHallway1;
+                  if (number >= 11 && !isOdd) x += xHallway1;
+                }
+                if (row >= 28) {
+                  y += yHallway;
+                  if (row >= 42) y += yHallway;
+                  if (number >= 11 && isOdd) x -= xHallway1;
+                  if (number >= 11 && !isOdd) x += xHallway1;
+                  if (number >= 35 && row !== 54 && isOdd) x -= xHallway2;
+                  if (number >= 35 && row !== 54 && !isOdd) x += xHallway2;
+                  if (number >= 31 && row === 54 && isOdd)
+                    x -= xHallway2 + 2 * xColumn;
+                  if (number >= 31 && row === 54 && !isOdd)
+                    x += xHallway2 + 2 * xColumn;
+                }
+                return [seat.perspectiveImage, seat.routeImage, x, y];
+              }
+            }
+          } else if (type === reservedSeats) {
+            for (const seat of seats.reservedSeats) {
+              if (
+                (row === seat.row[0] &&
+                  number >= seat.number[0] &&
+                  number <= seat.number[1] &&
+                  isOdd === seat.isOdd) ||
+                (row >= seat.row[0] &&
+                  row <= seat.row[1] &&
+                  number >= seat.number[0] &&
+                  number <= seat.number[1] &&
+                  isOdd === seat.isOdd)
+              ) {
+                let x, y;
+                if (row <= 30) {
+                  x = Math.ceil((number - 1) / 2) * xColumn;
+                  y = (row - 1) * yRow;
+                  if (isOdd) {
+                    x = -x;
+                    x += BX1Odd;
+                    y += BY1Odd;
+                  } else {
+                    x -= xColumn;
+                    x += BX1Even;
+                    y += BY1Even;
+                  }
+                  if (row === 19) {
+                    if (isOdd) x -= xColumn;
+                    else {
+                      x += xColumn;
+                    }
+                  }
+                  if (row >= 22) {
+                    if (isOdd) x += xColumn;
+                    else {
+                      x -= xColumn;
+                    }
+                  }
+                }
+                if (row >= 31) {
+                  x = Math.ceil((number - B2CenterColumn) / 2) * xColumn;
+                  if (isOdd) x = -x;
+                  y = (row - B2CenterRow) * yRow;
+                  x += BX2Center;
+                  y += BY2Center;
+
+                  if (number >= 13 && isOdd) x -= xHallway2;
+                  if (number >= 13 && !isOdd) x += xHallway2;
+                  if (number >= 37 && isOdd) x -= xHallway2;
+                  if (number >= 37 && !isOdd) x += xHallway2;
+                }
+                return [seat.perspectiveImage, seat.routeImage, x, y];
+              }
+            }
+          } else if (type === vipSeats) {
+            for (const seat of seats.vipSeats) {
+              if (
+                (number === seat.number[0] && isOdd === seat.isOdd) ||
+                (number >= seat.number[0] &&
+                  number <= seat.number[1] &&
+                  isOdd === seat.isOdd)
+              ) {
+                let x = Math.ceil((number - 1) / 2) * vipXColumn;
+                if (isOdd) x = -x;
+                x += centerXVip;
+                let y = centerYVip;
+
+                if (number >= 8 && isOdd) x -= xHallway3;
+                if (number >= 8 && !isOdd) x += xHallway3;
+
+                return [seat.perspectiveImage, seat.routeImage, x, y];
+              }
+            }
+          } else if (type === wheelchairSeats) {
+            for (const seat of seats.wheelchairSeats) {
+              if (
+                (number === seat.number[0] && isOdd === seat.isOdd) ||
+                (number >= seat.number[0] &&
+                  number <= seat.number[1] &&
+                  isOdd === seat.isOdd)
+              ) {
+                if (number <= 10 && isOdd) {
+                  let x = 807 + ((number - 1) / 2) * wheelchairXColumn;
+                  let y = 1112 + ((number - 1) / 2) * wheelchairYColumn;
+                  return [seat.perspectiveImage, seat.routeImage, x, y];
+                }
+                if (number <= 10 && !isOdd) {
+                  let x = 1930 - ((number - 2) / 2) * wheelchairXColumn;
+                  let y = 1112 + ((number - 2) / 2) * wheelchairYColumn;
+                  return [seat.perspectiveImage, seat.routeImage, x, y];
+                }
+                if (number <= 10 && isEven) {
+                  return [seat.perspectiveImage, seat.routeImage, x, y];
+                }
+                if (number === 11)
+                  return [seat.perspectiveImage, seat.routeImage, 775, 785];
+                if (number === 12)
+                  return [seat.perspectiveImage, seat.routeImage, 1927, 785];
+                if (number === 13)
+                  return [seat.perspectiveImage, seat.routeImage, 740, 775];
+                if (number === 14)
+                  return [seat.perspectiveImage, seat.routeImage, 1963, 765];
+                if (number === 15)
+                  return [seat.perspectiveImage, seat.routeImage, 910, 690];
+                if (number === 16)
+                  return [seat.perspectiveImage, seat.routeImage, 1825, 690];
+              }
+            }
+          }
+          throw new Error();
+        }
+
+        $("#js_seat_type_select").change(function (e) {
+          let optionSelected = $(this).find("option:selected");
+          let type = optionSelected.text();
+          $(".js_user_typing_row").val("");
+          $(".js_user_typing_number").val("");
+          $(".js_wheelchair_prefix").hide();
+          $(".js_reserved_prefix").hide();
+          if (type === normalSeats) {
+            $(".js_user_typing_row").prop("disabled", false);
+            $(".js_user_typing_number").prop("disabled", true);
+            $(".js_user_typing_row").prop("max", 55);
+            $(".js_user_typing_row").prop("placeholder", "1~55");
+            $(".js_user_typing_number").prop("placeholder", "");
+          } else if (type === reservedSeats) {
+            $(".js_user_typing_row").prop("disabled", false);
+            $(".js_user_typing_number").prop("disabled", true);
+            $(".js_user_typing_row").prop("max", 35);
+            $(".js_reserved_prefix").show();
+            $(".js_user_typing_row").prop("placeholder", "1~35");
+            $(".js_user_typing_number").prop("placeholder", "");
+          } else if (type === vipSeats) {
+            $(".js_user_typing_row").prop("disabled", true);
+            $(".js_user_typing_number").prop("disabled", false);
+            $(".js_user_typing_number").prop("max", 21);
+            $(".js_user_typing_row").prop("placeholder", "");
+            $(".js_user_typing_number").prop("placeholder", "1~21");
+          } else if (type === wheelchairSeats) {
+            $(".js_user_typing_row").prop("disabled", true);
+            $(".js_user_typing_number").prop("disabled", false);
+            $(".js_user_typing_number").prop("max", 16);
+            $(".js_wheelchair_prefix").show();
+            $(".js_user_typing_row").prop("placeholder", "");
+            $(".js_user_typing_number").prop("placeholder", "1~16");
+          } else {
+            $(".js_user_typing_row").prop("disabled", true);
+            $(".js_user_typing_number").prop("disabled", true);
+            $(".js_user_typing_row").prop("placeholder", "");
+            $(".js_user_typing_number").prop("placeholder", "");
+          }
+        });
+
+        $(".view").click(function () {
+          const id = $(this).attr("id");
+          const [prefix, section] = id.split("js_view_");
+          const sectionNumber = section.split("section_")[1];
+          $(".js_perspective_map_img").attr(
+            "src",
+            `images/ticc/plenary_hall_seat_search/${section}.png`
+          );
+          $(".js_perspective_map_title").text(`區域 ${sectionNumber}`);
+          $(".js_perspective_map_btn").hide();
+        });
+
+        $(".js_clear_btn").click(function () {
+          const type = $("#js_seat_type_select option:selected").text();
+          if (type === normalSeats || type === reservedSeats) {
+            $(".js_user_typing_number").prop("disabled", true);
+            $(".js_user_typing_number").prop("placeholder", "");
+          }
+          $(".js_user_typing_row").val("");
+          $(".js_user_typing_number").val("");
+        });
+
+        $(".js_search_btn").click(function () {
+          let type = $("#js_seat_type_select option:selected").text();
+          let row = 1;
+          if (type === normalSeats || type === reservedSeats) {
+            row = +$(".js_user_typing_row").val();
+          }
+          let number = +$(".js_user_typing_number").val();
+
+          if (!(row && number)) {
+            alert("請輸入您的座位。");
+            return;
+          }
+
+          if (type !== "請選擇座位型式") {
+            try {
+              if (type !== curType || number !== curNumber || row !== curRow) {
+                [curPhoto, curRoute, curSeatX, curSeatY] = seatImages(
+                  type,
+                  row,
+                  number
+                );
+                curType = type;
+                curRow = row;
+                curNumber = number;
+                curPhoto = `images/ticc/plenary_hall_seat_search/${curPhoto}`;
+                $(".js_center_seat").attr("x", curSeatX);
+                $(".js_center_seat").attr("y", curSeatY);
+                $(".js_center_seat").show();
+
+                zoomInMap.get(1)[2] = curSeatX - zoomInOffsetX;
+                zoomInMap.get(1)[3] = curSeatY - zoomInOffsetY;
+                zoomInMap.get(2)[2] =
+                  curSeatX - svgWidth / Math.pow(sizeFactor, 2) / 2;
+                zoomInMap.get(2)[3] =
+                  curSeatY - svgHeight / Math.pow(sizeFactor, 2) / 2;
+                zoomInMap.get(3)[2] =
+                  curSeatX - svgWidth / Math.pow(sizeFactor, 3) / 2;
+                zoomInMap.get(3)[3] =
+                  curSeatY - svgHeight / Math.pow(sizeFactor, 3) / 2;
+                zoomInMap.get(4)[2] =
+                  curSeatX - svgWidth / Math.pow(sizeFactor, 4) / 2;
+                zoomInMap.get(4)[3] =
+                  curSeatY - svgHeight / Math.pow(sizeFactor, 4) / 2;
+
+                curTop =
+                  minimapHeight / (svgHeight / (curSeatY - zoomInOffsetY));
+                curLeft =
+                  minimapWidth / (svgWidth / (curSeatX - zoomInOffsetX));
+
+                curTitle =
+                  type === normalSeats || type === reservedSeats
+                    ? `${type}  ${row}排${number}號`
+                    : `${type}  ${number}號`;
+
+                $(".exit").removeClass("show");
+                $(`.${curRoute}`).addClass("show");
+              }
+              $(".view").hide();
+
+              animateViewBox(
+                1,
+                curSeatX - zoomInOffsetX,
+                curSeatY - zoomInOffsetY,
+                zoomInWidth,
+                zoomInHeight
+              );
+
+              $(".js_minimap_draggable").show();
+              animateMinimap(
+                1,
+                curLeft,
+                curTop,
+                minimapZoomInWidth,
+                minimapZoomInHeight
+              );
+
+              zoomInCount = 1;
+
+              $(".js_perspective_map_title").text(curTitle);
+              $(".js_perspective_map_img").prop("src", curPhoto);
+              $(".js_perspective_map_btn").show();
+              $(".js_perspective_map").show();
+            } catch (error) {
+              // alert("抱歉!搜尋不到您所輸入的座位，請重新查詢。");
+            }
+          }
+        });
+
+        $(".js_user_typing_row").change(function () {
+          $(".js_user_typing_number").val("");
+          if ($(this).val() === "") {
+            $(".js_user_typing_number").prop("placeholder", "");
+            $(".js_user_typing_number").prop("disabled", true);
+            return;
+          }
+          const type = $("#js_seat_type_select option:selected").text();
+          let numStart, numEnd;
+          if (type === normalSeats) {
+            if (parseInt($(this).val()) > 55) $(this).val(55);
+            [numStart, numEnd] = seats.normalSeatsMap[$(this).val()];
+          } else if (type === reservedSeats) {
+            if (parseInt($(this).val()) > 35) $(this).val(35);
+            [numStart, numEnd] = seats.reservedSeatsMap[$(this).val()];
+          }
+          $(".js_user_typing_number").attr({
+            min: numStart,
+            max: numEnd,
+            placeholder: `${numStart}~${numEnd}`,
+          });
+          $(".js_user_typing_number").prop("disabled", false);
+        });
+
+        $(".js_user_typing_number").change(function () {
+          const maxNum = $(this).attr("max");
+          const minNum = $(this).attr("min");
+          if (parseInt($(this).val()) > maxNum) $(this).val(maxNum);
+          if (parseInt($(this).val()) < minNum) $(this).val(minNum);
+        });
+
+        function animateViewBox(duration, x, y, width, height) {
+          gsap.to(document.querySelector(".js_svg"), {
+            duration: duration,
+            attr: { viewBox: `${x} ${y} ${width} ${height}` },
+            ease: "power3.inOut",
+          });
+        }
+
+        function animateMinimap(duration, x, y, width, height) {
+          gsap.to(document.querySelector(".js_minimap_draggable"), {
+            duration: duration,
+            left: x,
+            top: y,
+            width: width,
+            height: height,
+            ease: "power3.inOut",
+          });
+        }
+
+        let isZoomDisabled = false;
+        $(".js_zoom_in").click(function () {
+          if (isZoomDisabled) return;
+          if (zoomInCount >= 4) return;
+
+          const [width, height, x, y] = zoomInMap.get(++zoomInCount);
+          animateViewBox(1, x, y, width, height);
+
+          const top = minimapHeight / (svgHeight / y);
+          const left = minimapWidth / (svgWidth / x);
+
+          const minimapDraggableWidth = zoomInMap.get(zoomInCount)[6];
+          const minimapDraggableHeight = zoomInMap.get(zoomInCount)[7];
+
+          if (zoomInCount === 1) {
+            $(".js_minimap_draggable").show();
+            $(".view").hide();
+          }
+
+          animateMinimap(
+            1,
+            left,
+            top,
+            minimapDraggableWidth,
+            minimapDraggableHeight
+          );
+        });
+
+        $(".js_zoom_out").click(function () {
+          if (zoomInCount <= 0) return;
+
+          const [width, height, x, y] = zoomInMap.get(--zoomInCount);
+          animateViewBox(1, x, y, width, height);
+
+          const top = minimapHeight / (svgHeight / y);
+          const left = minimapWidth / (svgWidth / x);
+
+          const minimapDraggableWidth = zoomInMap.get(zoomInCount)[6];
+          const minimapDraggableHeight = zoomInMap.get(zoomInCount)[7];
+
+          if (zoomInCount === 0) {
+            isZoomDisabled = true;
+            setTimeout(function () {
+              $(".view").show();
+              $(".js_minimap_draggable").hide();
+              isZoomDisabled = false;
+            }, 1000);
+            animateMinimap(1, 0, 0, minimapWidth, minimapHeight);
+          } else {
+            animateMinimap(
+              1,
+              left,
+              top,
+              minimapDraggableWidth,
+              minimapDraggableHeight
+            );
+          }
+        });
+
+        $(".js_center_seat").click(function () {
+          $(".js_perspective_map_img").prop("src", curPhoto);
+          $(".js_perspective_map_title").text(curTitle);
+          $(".js_perspective_map_btn").show();
+          $(".js_perspective_map").show();
+        });
+
+        let isDragging = 0;
+        let lastMousePosition = { x: null, y: null };
+        const svgOffset = $(".js_svg").offset();
+
+        $(".js_svg").on("pointerdown", function (event) {
+          /* Image should be loaded before it can be dragged */
+
+          isDragging = 1;
+
+          /* Save mouse position */
+          lastMousePosition = {
+            x: event.clientX - svgOffset.left,
+            y: event.clientY - svgOffset.top,
+          };
+        });
+
+        $(".js_svg").on("pointerup pointerleave", function () {
+          isDragging = 0;
+        });
+
+        $(".js_svg").on("pointermove", function (event) {
+          if (zoomInCount === 0) return;
+          if (isDragging == 1) {
+            const currentMousePosition = {
+              x: event.clientX - svgOffset.left,
+              y: event.clientY - svgOffset.top,
+            };
+            const change_x = currentMousePosition.x - lastMousePosition.x;
+            const change_y = currentMousePosition.y - lastMousePosition.y;
+
+            /* Save mouse position */
+            lastMousePosition = currentMousePosition;
+
+            /* Validate top and left do not fall outside the image, otherwise white space will be seen */
+
+            const dimensions = $(".js_svg").attr("viewBox").split(" ");
+            const x = +dimensions[0];
+            const y = +dimensions[1];
+            const [width, height] = zoomInMap.get(zoomInCount);
+
+            let newX = x - change_x;
+            let newY = y - change_y;
+
+            if (zoomInCount === 0) {
+              newX = 0;
+              newY = 0;
+            } else if (zoomInCount === 1) {
+              if (newX > 1800) newX = 1800;
+              if (newX < -800) newX = -800;
+              if (newY > 2000) newY = 2000;
+              if (newY < -300) newY = -300;
+            } else if (zoomInCount === 2) {
+              if (newX > 2000) newX = 2000;
+              if (newX < -500) newX = -500;
+              if (newY > 2250) newY = 2250;
+              if (newY < 0) newY = 0;
+            } else if (zoomInCount === 3) {
+              if (newX > 2200) newX = 2200;
+              if (newX < -200) newX = -200;
+              if (newY > 2500) newY = 2500;
+              if (newY < 0) newY = 0;
+            } else if (zoomInCount === 4) {
+              if (newX > 2400) newX = 2400;
+              if (newX < 0) newX = 0;
+              if (newY > 2600) newY = 2600;
+              if (newY < 0) newY = 0;
+            }
+
+            animateViewBox(0.01, newX, newY, width, height);
+
+            const top = minimapHeight / (svgHeight / newY);
+            const left = minimapWidth / (svgWidth / newX);
+
+            const minimapDraggableWidth = zoomInMap.get(zoomInCount)[6];
+            const minimapDraggableHeight = zoomInMap.get(zoomInCount)[7];
+
+            animateMinimap(
+              0.01,
+              left,
+              top,
+              minimapDraggableWidth,
+              minimapDraggableHeight
+            );
+          }
+        });
+
+        let isDraggingMinimap = 0;
+        let lastMousePositionMinimap = { x: null, y: null };
+        const svgOffsetMinimap = $(".js_minimap_draggable_container").offset();
+
+        $(".js_minimap_draggable").on("pointerdown", function (event) {
+          /* Image should be loaded before it can be dragged */
+
+          isDraggingMinimap = 1;
+
+          /* Save mouse position */
+          lastMousePositionMinimap = {
+            x: event.clientX - svgOffsetMinimap.left,
+            y: event.clientY - svgOffsetMinimap.top,
+          };
+        });
+
+        $(".js_minimap_draggable").on("pointerup pointerleave", function () {
+          isDraggingMinimap = 0;
+        });
+
+        $(".js_minimap_draggable").on("pointermove", function (event) {
+          if (zoomInCount === 0) return;
+
+          if (isDraggingMinimap == 1) {
+            const currentMousePosition = {
+              x: event.clientX - svgOffsetMinimap.left,
+              y: event.clientY - svgOffsetMinimap.top,
+            };
+            const change_x =
+              currentMousePosition.x - lastMousePositionMinimap.x;
+            const change_y =
+              currentMousePosition.y - lastMousePositionMinimap.y;
+
+            /* Save mouse position */
+            lastMousePositionMinimap = currentMousePosition;
+
+            /* Validate top and left do not fall outside the image, otherwise white space will be seen */
+
+            const top = parseFloat($(".js_minimap_draggable").css("top"));
+            const left = parseFloat($(".js_minimap_draggable").css("left"));
+
+            const width = zoomInMap.get(zoomInCount)[6];
+            const height = zoomInMap.get(zoomInCount)[7];
+
+            let newTop = top + change_y;
+            let newLeft = left + change_x;
+
+            if (newTop < 0) newTop = 0;
+            if (newLeft < 0) newLeft = 0;
+
+            const minimapY = zoomInMap.get(zoomInCount)[5];
+
+            if (newTop > minimapY) newTop = minimapY;
+
+            const minimapX = zoomInMap.get(zoomInCount)[4];
+            if (newLeft > minimapX) newLeft = minimapX;
+
+            $(".js_minimap_draggable").css({
+              top: `${newTop}px`,
+              left: `${newLeft}px`,
+            });
+
+            const newY = (newTop * svgHeight) / minimapHeight;
+            const newX = (newLeft * svgWidth) / minimapWidth;
+
+            const [mapWidth, mapHeight] = zoomInMap.get(zoomInCount);
+
+            animateViewBox(0.01, newX, newY, mapWidth, mapHeight);
+          }
+        });
+      });
+
+      function checkRowInput() {
+        const rowInput = $(".js_user_typing_row");
+        if (!rowInput.val()) {
+          rowInput.val("");
+          return;
+        }
+        rowInput.val(Math.round(rowInput.val()));
+        if (rowInput.val() < 1) rowInput.val(1);
+      }
+
+      function checkNumInput() {
+        const numInput = $(".js_user_typing_number");
+        if (!numInput.val()) {
+          numInput.val("");
+          return;
+        }
+        numInput.val(Math.round(numInput.val()));
+        if (numInput.val() < 1) numInput.val(1);
+      }
+    </script>
+    <!--跳窗-->
+    <div id="modal1" class="modal">
+      <h2>標題</h2>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Libero,
+        perferendis cumque nobis recusandae aperiam? Quis sunt, sit error
+        consequuntur, amet, odit corrupti exercitationem eveniet debitis facere
+        dolor mollitia natus suscipit.
+      </p>
+      <div class="btn_grp">
+        <button class="btn btn-secondary">好的</button>
+      </div>
+    </div>
+    <!-- room info -->
+    <div class="room_info js_perspective_map">
+      <a href="javascript:;" class="close">關閉</a>
+      <div class="function">
+        <h3 class="title js_perspective_map_title">一般席&nbsp;20排18號</h3>
+        <button class="btn lightbox js_perspective_map_btn">建議路線</button>
+      </div>
+      <div class="img-container">
+        <img
+          src="images/ticc/viewport-sample.jpg"
+          alt=""
+          class="contain js_perspective_map_img"
+        />
+      </div>
+    </div>
+    <!-- room info 跳窗 style="display: none;" -->
+    <div class="full_lightbox">
+      <div class="inner">
+        <a href="javascript:;" class="close">關閉</a>
+        <h3>建議路線</h3>
+        <p>從台北國際會議中心一樓至大會堂路線導引</p>
+        <!-- 預設隱藏，show 顯示 -->
+        <div class="map">
+          <!-- 地圖 -->
+          <div class="img-container">
+            <div class="exit _2MF_L">2MF</div>
+            <div class="exit _2MF_R">2MF</div>
+            <div class="exit _3F_L">3F</div>
+            <div class="exit _3F_R">3F</div>
+            <div class="exit _4F_L">4F</div>
+            <div class="exit _4F_R">4F</div>
+            <div class="exit _5F_L">5F</div>
+            <div class="exit _5F_R">5F</div>
+            <div class="exit _6F_L">6F</div>
+            <div class="exit _6F_R">6F</div>
+            <div class="exit _L_56F">5F/6F</div>
+            <div class="exit _R_56F">5F/6F</div>
+            <img src="images/seat_map.jpg" alt="" class="contain" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- wrapper Start -->
+    <div class="wrapper">
+      <!-- header Start -->
+      <header class="header">
+        <div class="container">
+          <!-- navigation Start -->
+          <nav class="navigation" role="navigation" aria-label="Site">
+            <!-- Search Start -->
+            <div class="search" role="search">
+              <button class="switch">開關</button>
+              <div class="form_grp">
+                <input
+                  name="username"
+                  id="mustSameAsId"
+                  type="text"
+                  placeholder="請輸入文字"
+                  title="請輸入文字"
+                  aria-label="搜尋網站內容"
+                />
+                <input
+                  name=""
+                  type="submit"
+                  value="查詢"
+                  class="btn btn-search"
+                />
+              </div>
+            </div>
+            <!-- 新增div navlist -->
+            <div class="navlist">
+              <ul>
+                <li><a href="#">回首頁</a></li>
+                <li><a href="#">網站導覽</a></li>
+              </ul>
+            </div>
+            <!-- language -->
+            <div class="language">
+              <a href="#" class="switch">EN</a>
+              <ul>
+                <li><a href="#">繁中</a></li>
+                <li><a href="#">EN</a></li>
+              </ul>
+            </div>
+          </nav>
+          <!-- navigation End -->
+          <h1>
+            <a href="index.htm"
+              ><img src="images/ticc/logo-default.png" alt="網站標題"
+            /></a>
+          </h1>
+          <!-- menu Start -->
+          <nav class="menu" role="navigation" aria-label="About page">
+            <ul>
+              <li>
+                <a href="#">關於我們</a>
+                <ul>
+                  <li><a href="#">第二層選單</a></li>
+                  <li><a href="#">第二層選單</a></li>
+                  <li><a href="#">第二層選單</a></li>
+                </ul>
+              </li>
+              <li>
+                <a href="#">最新消息</a>
+                <ul>
+                  <li><a href="#">第二層選單</a></li>
+                  <li><a href="#">第二層選單</a></li>
+                  <li><a href="#">第二層選單</a></li>
+                </ul>
+              </li>
+              <li>
+                <a href="#">場地導覽</a>
+                <ul>
+                  <li><a href="#">第二層選單</a></li>
+                  <li><a href="#">第二層選單</a></li>
+                  <li><a href="#">第二層選單</a></li>
+                </ul>
+              </li>
+              <li>
+                <a href="#">檔期查詢</a>
+                <ul>
+                  <li><a href="#">第二層選單</a></li>
+                  <li><a href="#">第二層選單</a></li>
+                  <li><a href="#">第二層選單</a></li>
+                </ul>
+              </li>
+              <li>
+                <a href="#">預約洽訂</a>
+                <ul>
+                  <li><a href="#">第二層選單</a></li>
+                  <li><a href="#">第二層選單</a></li>
+                  <li><a href="#">第二層選單</a></li>
+                </ul>
+              </li>
+              <li>
+                <a href="#">參宴服務</a>
+                <ul>
+                  <li><a href="#">第二層選單</a></li>
+                  <li><a href="#">第二層選單</a></li>
+                  <li><a href="#">第二層選單</a></li>
+                </ul>
+              </li>
+              <li>
+                <a href="#">出租服務</a>
+                <ul>
+                  <li><a href="#">第二層選單</a></li>
+                  <li><a href="#">第二層選單</a></li>
+                  <li><a href="#">第二層選單</a></li>
+                </ul>
+              </li>
+              <li>
+                <a href="#">資源下載</a>
+                <ul>
+                  <li><a href="#">第二層選單</a></li>
+                  <li><a href="#">第二層選單</a></li>
+                  <li><a href="#">第二層選單</a></li>
+                </ul>
+              </li>
+            </ul>
+          </nav>
+          <!-- menu End -->
+        </div>
+      </header>
+      <!-- header End -->
+      <!-- main Start -->
+      <div id="center" class="main innerpage">
+        <div class="container-hero">
+          <!-- 內頁新增一個classname-->
+          <!-- side bar -->
+          <section class="sideBar wow fadeInRight" data-wow-delay=".3s">
+            <a href="javascript:;">檔期<br />查詢</a>
+            <a href="javascript:;">線上<br />洽詢</a>
+            <a href="javascript:;">VR<br />實境</a>
+            <a href="javascript:;">活動<br />行事曆</a>
+            <a href="javascript:;" class="sb-scrollToTop">Top</a>
+          </section>
+          <!-- 影片 -->
+          <section class="full hero">
+            <div class="container">
+              <!-- slogen -->
+              <h3 class="slogen wow bounceInLeft">
+                Taipei<br />
+                International<br />
+                Convention Center
+              </h3>
+              <!-- 登入＋查詢 -->
+              <div class="btn_box">
+                <a href="#" class="btn">預約編號登入<span>Login in</span></a>
+                <a href="#" class="btn">大會堂座位圖查詢<span>Search</span></a>
+              </div>
+              <img src="images/ticc/img-hero.jpg" alt="" />
+            </div>
+          </section>
+        </div>
+        <div class="mainTitleBox">
+          <!-- breadcrumb路徑 -->
+          <div class="breadcrumb">
+            <ul>
+              <li><a href="#">首頁</a></li>
+              <li><a href="#">節點</a></li>
+              <li>節點</li>
+            </ul>
+          </div>
+          <!-- function 預定地 -->
+          <div class="function">
+            <ul>
+              <li class="icon_back"><a href="#">回上一頁</a></li>
+              <!-- <li class="icon_print"><a href="#">友善列印</a></li>
+                        <li class="icon_forward"><a href="#">轉寄友人</a></li> -->
+            </ul>
+          </div>
+          <h2 class="title">
+            大會堂座位查詢<br /><span>Plenary Hall Seat Search</span>
+          </h2>
+        </div>
+        <!-- 主要內容 -->
+        <div class="container">
+          <!-- 左側 -->
+          <!-- 主要內容區 -->
+          <div class="center_block">
+            <!-- content Start -->
+            <section class="card">
+              <div class="inner">
+                <!-- 篩選 -->
+                <div class="filter_box">
+                  <div class="flex-one-row">
+                    <div class="col">
+                      <span>座位</span>
+                      <select name="" id="js_seat_type_select">
+                        <option value="">請選擇座位型式</option>
+                        <option value="">一般席</option>
+                        <option value="">包廂席</option>
+                        <option value="">貴賓席</option>
+                        <option value="">輪椅席</option>
+                      </select>
+                    </div>
+                    <div class="col">
+                      <input
+                        name="number"
+                        type="number"
+                        min="1"
+                        oninput="checkRowInput()"
+                        value=""
+                        placeholder=""
+                        class="user_typing complex js_user_typing_row"
+                        disabled
+                      /><span class="js_seat_row_span" style="min-width: 0"
+                        >排</span
+                      >
+                    </div>
+                    <div class="col">
+                      <span
+                        style="display: none; min-width: 0"
+                        class="js_reserved_prefix"
+                        >B</span
+                      >
+                      <span
+                        style="display: none; min-width: 0"
+                        class="js_wheelchair_prefix"
+                        >H</span
+                      >
+                      <input
+                        name="number"
+                        type="number"
+                        min="1"
+                        oninput="checkNumInput()"
+                        value=""
+                        placeholder=""
+                        class="user_typing complex js_user_typing_number"
+                        disabled
+                      /><span class="js_seat_number_span" style="min-width: 0"
+                        >號</span
+                      >
+                    </div>
+                    <div class="col">
+                      <!-- 按鈕 -->
+                      <div class="btn_grp">
+                        <input
+                          name=""
+                          type="reset"
+                          value="清除"
+                          class="btn btn-reset js_clear_btn"
+                        />
+                        <input
+                          name=""
+                          type="submit"
+                          value="搜尋"
+                          class="btn btn-submit js_search_btn"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <p>
+              我們建議您使用Google
+              Chrome瀏覽器查詢大會堂座位，以獲得最佳瀏覽體驗。
+            </p>
+
+            <!-- 舞台 - default -->
+            <section class="seatDisplay">
+              <!-- 最近出口建議路線，跳窗 -->
+              <!-- <div class="exit"></div> -->
+
+              <div
+                class="js_minimap_container"
+                style="
+                  display: inline-block;
+                  width: 129px;
+                  position: absolute;
+                  right: 73px;
+                  border: solid black;
+                "
+              >
+                <div
+                  class="js_minimap_draggable_container"
+                  style="position: relative; overflow: hidden"
+                >
+                  <img
+                    class="js_svg_img"
+                    src="images/seat_map.jpg"
+                    alt="minimap"
+                    style="display: block"
+                    draggable="false"
+                  />
+                  <div
+                    class="js_minimap_draggable"
+                    style="
+                      position: absolute;
+                      background-color: #ff6600;
+                      opacity: 0.6;
+                      z-index: 1;
+                      top: 0px;
+                      left: 0px;
+                      display: none;
+                      width: 100%;
+                      height: 100%;
+                    "
+                  ></div>
+                </div>
+              </div>
+              <!-- 地圖放大縮小 -->
+              <div class="zoom_out js_zoom_out">縮小</div>
+              <div class="zoom_in js_zoom_in">放大</div>
+
+              <!-- 視角 -->
+              <!-- 2MF、3F、4F、5F、6F，各五個 -->
+              <!-- R_5F6F、 L_5F6F，各三個-->
+
+              <!-- 2MF -->
+              <div class="view _2MF-1" id="js_view_section_1">2MF-1</div>
+              <div class="view _2MF-2" id="js_view_section_2">2MF-2</div>
+              <div class="view _2MF-3" id="js_view_section_3">2MF-3</div>
+              <div class="view _2MF-4" id="js_view_section_4">2MF-4</div>
+              <div class="view _2MF-5" id="js_view_section_5">2MF-5</div>
+
+              <!-- 3F -->
+              <div class="view _3F-1" id="js_view_section_6">3F-1</div>
+              <div class="view _3F-2" id="js_view_section_7">3F-2</div>
+              <div class="view _3F-3" id="js_view_section_8">3F-3</div>
+              <div class="view _3F-4" id="js_view_section_9">3F-4</div>
+              <div class="view _3F-5" id="js_view_section_10">3F-5</div>
+
+              <!-- 4F -->
+              <div class="view _4F-1" id="js_view_section_12">4F-1</div>
+              <div class="view _4F-2" id="js_view_section_13">4F-2</div>
+              <div class="view _4F-3" id="js_view_section_14">4F-3</div>
+              <div class="view _4F-4" id="js_view_section_15">4F-4</div>
+              <div class="view _4F-5" id="js_view_section_16">4F-5</div>
+
+              <!-- 5F -->
+              <div class="view _5F-1" id="js_view_section_20">5F-1</div>
+              <div class="view _5F-2" id="js_view_section_21">5F-2</div>
+              <div class="view _5F-3" id="js_view_section_22">5F-3</div>
+              <div class="view _5F-4" id="js_view_section_23">5F-4</div>
+              <div class="view _5F-5" id="js_view_section_24">5F-5</div>
+
+              <!-- 6F -->
+              <div class="view _6F-1" id="js_view_section_27">6F-1</div>
+              <div class="view _6F-2" id="js_view_section_28">6F-2</div>
+              <div class="view _6F-3" id="js_view_section_29">6F-3</div>
+              <div class="view _6F-4" id="js_view_section_30">6F-4</div>
+              <div class="view _6F-5" id="js_view_section_31">6F-5</div>
+
+              <!-- R_5F6F -->
+              <div class="view _R-1" id="js_view_section_17">R-1</div>
+              <div class="view _R-2" id="js_view_section_25">R-2</div>
+              <div class="view _R-3" id="js_view_section_26">R-3</div>
+
+              <!-- L_5F6F -->
+              <div class="view _L-1" id="js_view_section_11">L-1</div>
+              <div class="view _L-2" id="js_view_section_18">L-2</div>
+              <div class="view _L-3" id="js_view_section_19">L-3</div>
+
+              <!-- 座位圖 -->
+              <!-- viewBox = "min-x min-y width height" -->
+              <!-- min-x : 水平位移-->
+              <!-- min-y : 垂直位移-->
+              <!-- width : 圖片本人寬 -->
+              <!-- height : 圖片本人高  -->
+              <!-- 0 0 2800 3200 -->
+              <svg
+                id="svg"
+                class="js_svg"
+                xmlns="images/seat_map.jpg"
+                viewBox="0 0 2800 3200"
+                preserveAspectRatio="xMidYMid meet"
+              >
+                <image
+                  class="seat_map js_seat_map"
+                  xlink:href="images/seat_map.jpg"
+                />
+
+                <!-- 27排 1號 為正中心 x="1356" y="1590" -->
+                <!-- 水平座標 -->
+                <!-- 向左 x-24，向右 x+24 -->
+                <!-- X走廊向左 x-90，向右 x+90-->
+                <!-- 上一排 y-31， 上一排 y+31-->
+                <!-- Y走廊向上 x-75，向下 x+75-->
+
+                <!-- 區塊2 單 -->
+                <!-- ★★★★★★★★★★★★ 1排 -->
+                <!-- 11號 -->
+                <image
+                  class="seat_this"
+                  x="1170"
+                  y="730"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!--  33號 -->
+                <image
+                  class="seat_this"
+                  x="906"
+                  y="730"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- ★★★★★★★★★★★★ 12排 -->
+                <!-- 11號 -->
+                <image
+                  class="seat_this"
+                  x="1170"
+                  y="1071"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!--  33號 -->
+                <image
+                  class="seat_this"
+                  x="906"
+                  y="1071"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+
+                <!-- 區塊3 單雙mix-->
+                <!-- ★★★★★★★★★★★★ 1排 -->
+                <!-- 1號  -->
+                <image
+                  class="seat_this"
+                  x="1356"
+                  y="730"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 9號 -->
+                <image
+                  class="seat_this"
+                  x="1260"
+                  y="730"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 10號 -->
+                <image
+                  class="seat_this"
+                  x="1476"
+                  y="730"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- ★★★★★★★★★★★★ 12排 -->
+                <!-- 1號  -->
+                <image
+                  class="seat_this"
+                  x="1356"
+                  y="1071"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 9號 -->
+                <image
+                  class="seat_this"
+                  x="1260"
+                  y="1071"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 10號 -->
+                <image
+                  class="seat_this"
+                  x="1476"
+                  y="1071"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+
+                <!-- 區塊4 雙-->
+                <!-- ★★★★★★★★★★★★ 1排 -->
+                <!-- 12號 -->
+                <image
+                  class="seat_this"
+                  x="1566"
+                  y="730"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 34號 -->
+                <image
+                  class="seat_this"
+                  x="1830"
+                  y="730"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- ★★★★★★★★★★★★ 12排 -->
+                <!-- 12號 -->
+                <image
+                  class="seat_this"
+                  x="1566"
+                  y="1071"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 34號 -->
+                <image
+                  class="seat_this"
+                  x="1830"
+                  y="1071"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+
+                <!-- 區塊7 單 -->
+                <!-- ★★★★★★★★★★★★ 13排 -->
+                <!-- 11號 -->
+                <image
+                  class="seat_this"
+                  x="1170"
+                  y="1156"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!--  33號 -->
+                <image
+                  class="seat_this"
+                  x="906"
+                  y="1156"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- ★★★★★★★★★★★★ 27排 -->
+                <!-- 11號 -->
+                <image
+                  class="seat_this"
+                  x="1170"
+                  y="1590"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!--  33號 -->
+                <image
+                  class="seat_this"
+                  x="906"
+                  y="1590"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+
+                <!-- 區塊8 單雙mix-->
+                <!-- ★★★★★★★★★★★★ 13排 -->
+                <!-- 1號 -->
+                <image
+                  class="seat_this"
+                  x="1356"
+                  y="1156"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 9號 -->
+                <image
+                  class="seat_this"
+                  x="1260"
+                  y="1156"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 10號 -->
+                <image
+                  class="seat_this"
+                  x="1476"
+                  y="1156"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- ★★★★★★★★★★★★ 27排 -->
+                <!-- 1號  -->
+                <image
+                  class="seat_this js_center_seat"
+                  x="1356"
+                  y="1590"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 9號 -->
+                <image
+                  class="seat_this"
+                  x="1260"
+                  y="1590"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 10號 -->
+                <image
+                  class="seat_this"
+                  x="1476"
+                  y="1590"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+
+                <!-- 區塊9 雙-->
+                <!-- ★★★★★★★★★★★★ 13排 -->
+                <!-- 12號 -->
+                <image
+                  class="seat_this"
+                  x="1566"
+                  y="1156"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 34號 -->
+                <image
+                  class="seat_this"
+                  x="1830"
+                  y="1156"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- ★★★★★★★★★★★★ 27排 -->
+                <!-- 12號 -->
+                <image
+                  class="seat_this"
+                  x="1566"
+                  y="1590"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 34號 -->
+                <image
+                  class="seat_this"
+                  x="1830"
+                  y="1590"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+
+                <!-- 區塊12 單 -->
+                <!-- ★★★★★★★★★★★★ 28排 -->
+                <!--  35號 -->
+                <image
+                  class="seat_this"
+                  x="830"
+                  y="1665"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!--  49號 -->
+                <image
+                  class="seat_this"
+                  x="662"
+                  y="1665"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- ★★★★★★★★★★★★ 41排 -->
+                <!--  35號 -->
+                <image
+                  class="seat_this"
+                  x="830"
+                  y="2068"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!--  53號 -->
+                <image
+                  class="seat_this"
+                  x="614"
+                  y="2068"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+
+                <!-- 區塊13 單 -->
+                <!-- ★★★★★★★★★★★★ 28排 -->
+                <!-- 11號 -->
+                <image
+                  class="seat_this"
+                  x="1170"
+                  y="1665"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!--  33號 -->
+                <image
+                  class="seat_this"
+                  x="906"
+                  y="1665"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- ★★★★★★★★★★★★ 41排 -->
+                <!-- 11號 -->
+                <image
+                  class="seat_this"
+                  x="1170"
+                  y="2068"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!--  33號 -->
+                <image
+                  class="seat_this"
+                  x="906"
+                  y="2068"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+
+                <!-- 區塊14 單雙mix -->
+                <!-- ★★★★★★★★★★★★ 28排 -->
+                <!-- 1號  -->
+                <image
+                  class="seat_this"
+                  x="1356"
+                  y="1665"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 9號 -->
+                <image
+                  class="seat_this"
+                  x="1260"
+                  y="1665"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 10號 -->
+                <image
+                  class="seat_this"
+                  x="1476"
+                  y="1665"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- ★★★★★★★★★★★★ 41排 -->
+                <!-- 1號 -->
+                <image
+                  class="seat_this"
+                  x="1356"
+                  y="2068"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 9號 -->
+                <image
+                  class="seat_this"
+                  x="1260"
+                  y="2068"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 10號 -->
+                <image
+                  class="seat_this"
+                  x="1476"
+                  y="2068"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+
+                <!-- 區塊15 雙-->
+                <!-- ★★★★★★★★★★★★ 28排 -->
+                <!-- 12號 -->
+                <image
+                  class="seat_this"
+                  x="1566"
+                  y="1665"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 34號 -->
+                <image
+                  class="seat_this"
+                  x="1830"
+                  y="1665"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- ★★★★★★★★★★★★ 41排 -->
+                <!-- 12號 -->
+                <image
+                  class="seat_this"
+                  x="1566"
+                  y="2068"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 34號 -->
+                <image
+                  class="seat_this"
+                  x="1830"
+                  y="2068"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+
+                <!-- 區塊16 雙-->
+                <!-- ★★★★★★★★★★★★ 28排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1910"
+                  y="1665"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 50號 -->
+                <image
+                  class="seat_this"
+                  x="2078"
+                  y="1665"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- ★★★★★★★★★★★★ 41排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1910"
+                  y="2068"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 54號 -->
+                <image
+                  class="seat_this"
+                  x="2126"
+                  y="2068"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+
+                <!-- 左側 -->
+                <!-- 區塊11、18、19 單-->
+                <!-- ★★★★★★★★★★★★ B1排 -->
+                <!-- 1號 -->
+                <image
+                  class="seat_this"
+                  x="424"
+                  y="1634"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 3號 -->
+                <image
+                  class="seat_this"
+                  x="400"
+                  y="1634"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 4號 -->
+                <image
+                  class="seat_this"
+                  x="376"
+                  y="1634"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ B19排 -->
+                <!-- 1號 -->
+                <image
+                  class="seat_this"
+                  x="400"
+                  y="2200"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 3號 -->
+                <image
+                  class="seat_this"
+                  x="376"
+                  y="2200"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ B30排 -->
+                <!-- 1號 -->
+                <image
+                  class="seat_this"
+                  x="448"
+                  y="2544"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 3號 -->
+                <image
+                  class="seat_this"
+                  x="424"
+                  y="2544"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 9號 -->
+                <image
+                  class="seat_this"
+                  x="352"
+                  y="2544"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 11號 -->
+                <image
+                  class="seat_this"
+                  x="328"
+                  y="2544"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+
+                <!-- 區塊1 單 x22 y8 -->
+                <!-- ★★★★★★★★★★★★ 4排 -->
+                <!-- 35號 -->
+                <image
+                  class="seat_this"
+                  x="784"
+                  y="820"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 37號 -->
+                <image
+                  class="seat_this"
+                  x="762"
+                  y="812"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 39號 -->
+                <image
+                  class="seat_this"
+                  x="740"
+                  y="804"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 41號 -->
+                <image
+                  class="seat_this"
+                  x="718"
+                  y="796"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 5排 -->
+                <!-- 35號 -->
+                <image
+                  class="seat_this"
+                  x="790"
+                  y="856"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 37號 -->
+                <image
+                  class="seat_this"
+                  x="768"
+                  y="848"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 39號 -->
+                <image
+                  class="seat_this"
+                  x="746"
+                  y="842"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 41號 -->
+                <image
+                  class="seat_this"
+                  x="724"
+                  y="834"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 6排 -->
+                <!-- 35號 -->
+                <image
+                  class="seat_this"
+                  x="796"
+                  y="892"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 37號 -->
+                <image
+                  class="seat_this"
+                  x="774"
+                  y="884"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 39號 -->
+                <image
+                  class="seat_this"
+                  x="752"
+                  y="876"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 41號 -->
+                <image
+                  class="seat_this"
+                  x="730"
+                  y="868"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 7排 -->
+                <!-- 35號 -->
+                <image
+                  class="seat_this"
+                  x="802"
+                  y="928"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 37號 -->
+                <image
+                  class="seat_this"
+                  x="780"
+                  y="920"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 39號 -->
+                <image
+                  class="seat_this"
+                  x="758"
+                  y="912"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 41號 -->
+                <image
+                  class="seat_this"
+                  x="736"
+                  y="904"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 8排 -->
+                <!-- 35號 -->
+                <image
+                  class="seat_this"
+                  x="800"
+                  y="964"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 37號 -->
+                <image
+                  class="seat_this"
+                  x="778"
+                  y="956"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 39號 -->
+                <image
+                  class="seat_this"
+                  x="756"
+                  y="948"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 41號 -->
+                <image
+                  class="seat_this"
+                  x="734"
+                  y="940"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 9排 -->
+                <!-- 35號 -->
+                <image
+                  class="seat_this"
+                  x="806"
+                  y="1000"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 37號 -->
+                <image
+                  class="seat_this"
+                  x="784"
+                  y="992"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 39號 -->
+                <image
+                  class="seat_this"
+                  x="762"
+                  y="984"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 41號 -->
+                <image
+                  class="seat_this"
+                  x="740"
+                  y="976"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 43號 -->
+                <image
+                  class="seat_this"
+                  x="718"
+                  y="968"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 10排 -->
+                <!-- 35號 -->
+                <image
+                  class="seat_this"
+                  x="812"
+                  y="1036"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 37號 -->
+                <image
+                  class="seat_this"
+                  x="790"
+                  y="1028"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 39號 -->
+                <image
+                  class="seat_this"
+                  x="768"
+                  y="1020"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 41號 -->
+                <image
+                  class="seat_this"
+                  x="746"
+                  y="1012"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 43號 -->
+                <image
+                  class="seat_this"
+                  x="724"
+                  y="1004"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 45號 -->
+                <image
+                  class="seat_this"
+                  x="702"
+                  y="996"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 11排 -->
+                <!-- 35號 -->
+                <image
+                  class="seat_this"
+                  x="822"
+                  y="1074"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 37號 -->
+                <image
+                  class="seat_this"
+                  x="800"
+                  y="1068"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 39號 -->
+                <image
+                  class="seat_this"
+                  x="778"
+                  y="1060"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 41號 -->
+                <image
+                  class="seat_this"
+                  x="756"
+                  y="1052"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 43號 -->
+                <image
+                  class="seat_this"
+                  x="734"
+                  y="1044"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 45號 -->
+                <image
+                  class="seat_this"
+                  x="712"
+                  y="1036"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 47號 -->
+                <image
+                  class="seat_this"
+                  x="690"
+                  y="1028"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 輪椅席 -->
+                <!-- H1 -->
+                <image
+                  class="seat_this"
+                  x="810"
+                  y="1110"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- H3 -->
+                <image
+                  class="seat_this"
+                  x="778"
+                  y="1102"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- H5 -->
+                <image
+                  class="seat_this"
+                  x="746"
+                  y="1094"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- H7 -->
+                <image
+                  class="seat_this"
+                  x="714"
+                  y="1086"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- H9 -->
+                <image
+                  class="seat_this"
+                  x="682"
+                  y="1078"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- H11 -->
+                <image
+                  class="seat_this"
+                  x="780"
+                  y="786"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- H13 -->
+                <image
+                  class="seat_this"
+                  x="740"
+                  y="778"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+
+                <!-- 區塊6 單 -->
+                <!-- ★★★★★★★★★★★★ 14排 -->
+                <!-- 35號 -->
+                <image
+                  class="seat_this"
+                  x="756"
+                  y="1158"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 37號 -->
+                <image
+                  class="seat_this"
+                  x="734"
+                  y="1150"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 15排 -->
+                <!-- 35號 -->
+                <image
+                  class="seat_this"
+                  x="770"
+                  y="1194"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 37號 -->
+                <image
+                  class="seat_this"
+                  x="748"
+                  y="1188"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 39號 -->
+                <image
+                  class="seat_this"
+                  x="726"
+                  y="1182"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 16排 -->
+                <!-- 35號 -->
+                <image
+                  class="seat_this"
+                  x="760"
+                  y="1222"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 37號 -->
+                <image
+                  class="seat_this"
+                  x="738"
+                  y="1218"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 39號 -->
+                <image
+                  class="seat_this"
+                  x="716"
+                  y="1214"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 41號 -->
+                <image
+                  class="seat_this"
+                  x="694"
+                  y="1210"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 43號 -->
+                <image
+                  class="seat_this"
+                  x="672"
+                  y="1206"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 17排 -->
+                <!-- 35號 -->
+                <image
+                  class="seat_this"
+                  x="776"
+                  y="1258"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 37號 -->
+                <image
+                  class="seat_this"
+                  x="754"
+                  y="1254"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 39號 -->
+                <image
+                  class="seat_this"
+                  x="732"
+                  y="1250"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 41號 -->
+                <image
+                  class="seat_this"
+                  x="710"
+                  y="1246"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 43號 -->
+                <image
+                  class="seat_this"
+                  x="688"
+                  y="1242"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 45號 -->
+                <image
+                  class="seat_this"
+                  x="666"
+                  y="1238"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 18排 -->
+                <!-- 35號 -->
+                <image
+                  class="seat_this"
+                  x="766"
+                  y="1288"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 37號 -->
+                <image
+                  class="seat_this"
+                  x="744"
+                  y="1284"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 39號 -->
+                <image
+                  class="seat_this"
+                  x="722"
+                  y="1280"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 41號 -->
+                <image
+                  class="seat_this"
+                  x="700"
+                  y="1276"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 43號 -->
+                <image
+                  class="seat_this"
+                  x="678"
+                  y="1272"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 45號 -->
+                <image
+                  class="seat_this"
+                  x="656"
+                  y="1268"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 19排 -->
+                <!-- 35號 -->
+                <image
+                  class="seat_this"
+                  x="758"
+                  y="1314"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 37號 -->
+                <image
+                  class="seat_this"
+                  x="736"
+                  y="1310"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 39號 -->
+                <image
+                  class="seat_this"
+                  x="712"
+                  y="1306"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 41號 -->
+                <image
+                  class="seat_this"
+                  x="688"
+                  y="1302"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 43號 -->
+                <image
+                  class="seat_this"
+                  x="670"
+                  y="1298"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 45號 -->
+                <image
+                  class="seat_this"
+                  x="644"
+                  y="1294"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 47號 -->
+                <image
+                  class="seat_this"
+                  x="620"
+                  y="1290"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 20排 -->
+                <!-- 35號 -->
+                <image
+                  class="seat_this"
+                  x="748"
+                  y="1350"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 37號 -->
+                <image
+                  class="seat_this"
+                  x="726"
+                  y="1346"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 39號 -->
+                <image
+                  class="seat_this"
+                  x="704"
+                  y="1342"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 41號 -->
+                <image
+                  class="seat_this"
+                  x="682"
+                  y="1338"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 43號 -->
+                <image
+                  class="seat_this"
+                  x="660"
+                  y="1334"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 45號 -->
+                <image
+                  class="seat_this"
+                  x="638"
+                  y="1330"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 47號 -->
+                <image
+                  class="seat_this"
+                  x="616"
+                  y="1326"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 21排 -->
+                <!-- 35號 -->
+                <image
+                  class="seat_this"
+                  x="760"
+                  y="1382"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 37號 -->
+                <image
+                  class="seat_this"
+                  x="738"
+                  y="1378"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 39號 -->
+                <image
+                  class="seat_this"
+                  x="716"
+                  y="1374"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 41號 -->
+                <image
+                  class="seat_this"
+                  x="694"
+                  y="1370"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 43號 -->
+                <image
+                  class="seat_this"
+                  x="672"
+                  y="1364"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 45號 -->
+                <image
+                  class="seat_this"
+                  x="650"
+                  y="1362"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 47號 -->
+                <image
+                  class="seat_this"
+                  x="628"
+                  y="1358"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 49號 -->
+                <image
+                  class="seat_this"
+                  x="606"
+                  y="1354"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 22排 -->
+                <!-- 35號 -->
+                <image
+                  class="seat_this"
+                  x="776"
+                  y="1412"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 37號 -->
+                <image
+                  class="seat_this"
+                  x="754"
+                  y="1408"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 39號 -->
+                <image
+                  class="seat_this"
+                  x="732"
+                  y="1404"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 41號 -->
+                <image
+                  class="seat_this"
+                  x="710"
+                  y="1400"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 43號 -->
+                <image
+                  class="seat_this"
+                  x="680"
+                  y="1396"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 45號 -->
+                <image
+                  class="seat_this"
+                  x="666"
+                  y="1392"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 47號 -->
+                <image
+                  class="seat_this"
+                  x="644"
+                  y="1388"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 49號 -->
+                <image
+                  class="seat_this"
+                  x="622"
+                  y="1384"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 51號 -->
+                <image
+                  class="seat_this"
+                  x="600"
+                  y="1380"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 53號 -->
+                <image
+                  class="seat_this"
+                  x="578"
+                  y="1376"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 23排 -->
+                <!-- 35號 -->
+                <image
+                  class="seat_this"
+                  x="790"
+                  y="1448"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 37號 -->
+                <image
+                  class="seat_this"
+                  x="768"
+                  y="1444"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 39號 -->
+                <image
+                  class="seat_this"
+                  x="746"
+                  y="1440"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 41號 -->
+                <image
+                  class="seat_this"
+                  x="724"
+                  y="1436"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 43號 -->
+                <image
+                  class="seat_this"
+                  x="702"
+                  y="1432"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 45號 -->
+                <image
+                  class="seat_this"
+                  x="680"
+                  y="1428"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 47號 -->
+                <image
+                  class="seat_this"
+                  x="658"
+                  y="1424"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 49號 -->
+                <image
+                  class="seat_this"
+                  x="636"
+                  y="1420"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 51號 -->
+                <image
+                  class="seat_this"
+                  x="614"
+                  y="1416"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 53號 -->
+                <image
+                  class="seat_this"
+                  x="592"
+                  y="1412"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 55號 -->
+                <image
+                  class="seat_this"
+                  x="570"
+                  y="1408"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 24排 -->
+                <!-- 35號 -->
+                <image
+                  class="seat_this"
+                  x="810"
+                  y="1484"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 37號 -->
+                <image
+                  class="seat_this"
+                  x="788"
+                  y="1480"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 39號 -->
+                <image
+                  class="seat_this"
+                  x="766"
+                  y="1476"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 41號 -->
+                <image
+                  class="seat_this"
+                  x="744"
+                  y="1472"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 43號 -->
+                <image
+                  class="seat_this"
+                  x="722"
+                  y="1468"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 45號 -->
+                <image
+                  class="seat_this"
+                  x="700"
+                  y="1464"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 47號 -->
+                <image
+                  class="seat_this"
+                  x="678"
+                  y="1460"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 49號 -->
+                <image
+                  class="seat_this"
+                  x="656"
+                  y="1456"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 51號 -->
+                <image
+                  class="seat_this"
+                  x="634"
+                  y="1452"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 53號 -->
+                <image
+                  class="seat_this"
+                  x="612"
+                  y="1448"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 25排 -->
+                <!-- 35號 -->
+                <image
+                  class="seat_this"
+                  x="822"
+                  y="1520"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 37號 -->
+                <image
+                  class="seat_this"
+                  x="800"
+                  y="1516"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 39號 -->
+                <image
+                  class="seat_this"
+                  x="778"
+                  y="1512"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 41號 -->
+                <image
+                  class="seat_this"
+                  x="756"
+                  y="1508"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 43號 -->
+                <image
+                  class="seat_this"
+                  x="734"
+                  y="1504"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 45號 -->
+                <image
+                  class="seat_this"
+                  x="712"
+                  y="1500"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 47號 -->
+                <image
+                  class="seat_this"
+                  x="690"
+                  y="1496"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 49號 -->
+                <image
+                  class="seat_this"
+                  x="668"
+                  y="1492"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 51號 -->
+                <image
+                  class="seat_this"
+                  x="646"
+                  y="1488"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 53號 -->
+                <image
+                  class="seat_this"
+                  x="624"
+                  y="1482"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 55號 -->
+                <image
+                  class="seat_this"
+                  x="602"
+                  y="1478"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 26排 -->
+                <!-- 35號 -->
+                <image
+                  class="seat_this"
+                  x="822"
+                  y="1554"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 37號 -->
+                <image
+                  class="seat_this"
+                  x="800"
+                  y="1550"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 39號 -->
+                <image
+                  class="seat_this"
+                  x="776"
+                  y="1546"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 41號 -->
+                <image
+                  class="seat_this"
+                  x="754"
+                  y="1542"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 43號 -->
+                <image
+                  class="seat_this"
+                  x="732"
+                  y="1538"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 45號 -->
+                <image
+                  class="seat_this"
+                  x="708"
+                  y="1534"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 47號 -->
+                <image
+                  class="seat_this"
+                  x="682"
+                  y="1530"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 49號 -->
+                <image
+                  class="seat_this"
+                  x="662"
+                  y="1526"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 51號 -->
+                <image
+                  class="seat_this"
+                  x="640"
+                  y="1522"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 53號 -->
+                <image
+                  class="seat_this"
+                  x="618"
+                  y="1518"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 27排 -->
+                <!-- 35號 -->
+                <image
+                  class="seat_this"
+                  x="836"
+                  y="1584"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 37號 -->
+                <image
+                  class="seat_this"
+                  x="814"
+                  y="1580"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 39號 -->
+                <image
+                  class="seat_this"
+                  x="792"
+                  y="1576"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 41號 -->
+                <image
+                  class="seat_this"
+                  x="770"
+                  y="1572"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 43號 -->
+                <image
+                  class="seat_this"
+                  x="748"
+                  y="1568"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 45號 -->
+                <image
+                  class="seat_this"
+                  x="724"
+                  y="1562"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 47號 -->
+                <image
+                  class="seat_this"
+                  x="700"
+                  y="1558"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 49號 -->
+                <image
+                  class="seat_this"
+                  x="678"
+                  y="1554"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 51號 -->
+                <image
+                  class="seat_this"
+                  x="654"
+                  y="1550"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 53號 -->
+                <image
+                  class="seat_this"
+                  x="630"
+                  y="1546"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 55號 -->
+                <image
+                  class="seat_this"
+                  x="606"
+                  y="1542"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+
+                <!-- 右側 -->
+                <!-- 區塊17、25、26 雙-->
+                <!-- ★★★★★★★★★★★★ B1排 -->
+                <!-- 2號 -->
+                <image
+                  class="seat_this"
+                  x="2308"
+                  y="1634"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 4號 -->
+                <image
+                  class="seat_this"
+                  x="2332"
+                  y="1634"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 6號 -->
+                <image
+                  class="seat_this"
+                  x="2356"
+                  y="1634"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ B19排 -->
+                <!-- 2號 -->
+                <image
+                  class="seat_this"
+                  x="2332"
+                  y="2200"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 4號 -->
+                <image
+                  class="seat_this"
+                  x="2356"
+                  y="2200"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ B30排 -->
+                <!-- 2號 -->
+                <image
+                  class="seat_this"
+                  x="2284"
+                  y="2544"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 4號 -->
+                <image
+                  class="seat_this"
+                  x="2308"
+                  y="2544"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 10號 -->
+                <image
+                  class="seat_this"
+                  x="2380"
+                  y="2544"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 12號 -->
+                <image
+                  class="seat_this"
+                  x="2404"
+                  y="2544"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+
+                <!-- 區塊5 雙 -->
+                <!-- 區塊5 雙 -->
+                <!-- ★★★★★★★★★★★★ 4排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1928"
+                  y="820"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 38號 -->
+                <image
+                  class="seat_this"
+                  x="1948"
+                  y="812"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 40號 -->
+                <image
+                  class="seat_this"
+                  x="1968"
+                  y="804"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 42號 -->
+                <image
+                  class="seat_this"
+                  x="1988"
+                  y="796"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 5排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1926"
+                  y="856"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 38號 -->
+                <image
+                  class="seat_this"
+                  x="1948"
+                  y="848"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 40號 -->
+                <image
+                  class="seat_this"
+                  x="1970"
+                  y="840"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 42號 -->
+                <image
+                  class="seat_this"
+                  x="1990"
+                  y="832"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 6排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1926"
+                  y="892"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 38號 -->
+                <image
+                  class="seat_this"
+                  x="1948"
+                  y="884"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 40號 -->
+                <image
+                  class="seat_this"
+                  x="1970"
+                  y="876"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 42號 -->
+                <image
+                  class="seat_this"
+                  x="1992"
+                  y="868"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 7排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1926"
+                  y="928"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 38號 -->
+                <image
+                  class="seat_this"
+                  x="1948"
+                  y="920"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 40號 -->
+                <image
+                  class="seat_this"
+                  x="1970"
+                  y="912"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 42號 -->
+                <image
+                  class="seat_this"
+                  x="1992"
+                  y="904"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 8排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1926"
+                  y="964"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 38號 -->
+                <image
+                  class="seat_this"
+                  x="1948"
+                  y="956"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 40號 -->
+                <image
+                  class="seat_this"
+                  x="1970"
+                  y="948"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 42號 -->
+                <image
+                  class="seat_this"
+                  x="1992"
+                  y="940"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 9排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1926"
+                  y="1000"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 38號 -->
+                <image
+                  class="seat_this"
+                  x="1948"
+                  y="992"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 40號 -->
+                <image
+                  class="seat_this"
+                  x="1970"
+                  y="984"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 42號 -->
+                <image
+                  class="seat_this"
+                  x="1990"
+                  y="976"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 44號 -->
+                <image
+                  class="seat_this"
+                  x="2010"
+                  y="968"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 10排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1926"
+                  y="1036"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 38號 -->
+                <image
+                  class="seat_this"
+                  x="1946"
+                  y="1028"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 40號 -->
+                <image
+                  class="seat_this"
+                  x="1966"
+                  y="1020"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 42號 -->
+                <image
+                  class="seat_this"
+                  x="1986"
+                  y="1012"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 44號 -->
+                <image
+                  class="seat_this"
+                  x="2006"
+                  y="1004"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 46號 -->
+                <image
+                  class="seat_this"
+                  x="2026"
+                  y="996"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 11排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1922"
+                  y="1072"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 38號 -->
+                <image
+                  class="seat_this"
+                  x="1942"
+                  y="1064"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 40號 -->
+                <image
+                  class="seat_this"
+                  x="1962"
+                  y="1056"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 42號 -->
+                <image
+                  class="seat_this"
+                  x="1982"
+                  y="1046"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 44號 -->
+                <image
+                  class="seat_this"
+                  x="2002"
+                  y="1040"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 46號 -->
+                <image
+                  class="seat_this"
+                  x="2022"
+                  y="1032"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 48號 -->
+                <image
+                  class="seat_this"
+                  x="2042"
+                  y="1024"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+
+                <!-- 區塊10 雙 -->
+                <!-- ★★★★★★★★★★★★ 14排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1980"
+                  y="1160"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 38號 -->
+                <image
+                  class="seat_this"
+                  x="2000"
+                  y="1152"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 15排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1966"
+                  y="1196"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 38號 -->
+                <image
+                  class="seat_this"
+                  x="1986"
+                  y="1191"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 40號 -->
+                <image
+                  class="seat_this"
+                  x="2006"
+                  y="1186"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 16排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1952"
+                  y="1228"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 38號 -->
+                <image
+                  class="seat_this"
+                  x="1972"
+                  y="1223"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 40號 -->
+                <image
+                  class="seat_this"
+                  x="1994"
+                  y="1218"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 42號 -->
+                <image
+                  class="seat_this"
+                  x="2016"
+                  y="1213"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 44號 -->
+                <image
+                  class="seat_this"
+                  x="2040"
+                  y="1208"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 17排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1938"
+                  y="1264"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 38號 -->
+                <image
+                  class="seat_this"
+                  x="1958"
+                  y="1259"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 40號 -->
+                <image
+                  class="seat_this"
+                  x="1982"
+                  y="1254"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 42號 -->
+                <image
+                  class="seat_this"
+                  x="2008"
+                  y="1249"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 44號 -->
+                <image
+                  class="seat_this"
+                  x="2028"
+                  y="1244"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 46號 -->
+                <image
+                  class="seat_this"
+                  x="2048"
+                  y="1239"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 18排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1946"
+                  y="1292"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 38號 -->
+                <image
+                  class="seat_this"
+                  x="1966"
+                  y="1288"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 40號 -->
+                <image
+                  class="seat_this"
+                  x="1990"
+                  y="1284"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 42號 -->
+                <image
+                  class="seat_this"
+                  x="2012"
+                  y="1280"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 44號 -->
+                <image
+                  class="seat_this"
+                  x="2036"
+                  y="1276"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 46號 -->
+                <image
+                  class="seat_this"
+                  x="2062"
+                  y="1272"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 19排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1932"
+                  y="1326"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 38號 -->
+                <image
+                  class="seat_this"
+                  x="1954"
+                  y="1322"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 40號 -->
+                <image
+                  class="seat_this"
+                  x="1976"
+                  y="1318"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 42號 -->
+                <image
+                  class="seat_this"
+                  x="1998"
+                  y="1314"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 44號 -->
+                <image
+                  class="seat_this"
+                  x="2020"
+                  y="1310"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 46號 -->
+                <image
+                  class="seat_this"
+                  x="2042"
+                  y="1306"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 48號 -->
+                <image
+                  class="seat_this"
+                  x="2068"
+                  y="1302"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 20排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1940"
+                  y="1360"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 38號 -->
+                <image
+                  class="seat_this"
+                  x="1962"
+                  y="1356"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 40號 -->
+                <image
+                  class="seat_this"
+                  x="1986"
+                  y="1352"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 42號 -->
+                <image
+                  class="seat_this"
+                  x="2010"
+                  y="1348"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 44號 -->
+                <image
+                  class="seat_this"
+                  x="2032"
+                  y="1344"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 46號 -->
+                <image
+                  class="seat_this"
+                  x="2054"
+                  y="1340"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 48號 -->
+                <image
+                  class="seat_this"
+                  x="2076"
+                  y="1336"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 21排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1926"
+                  y="1394"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 38號 -->
+                <image
+                  class="seat_this"
+                  x="1948"
+                  y="1390"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 40號 -->
+                <image
+                  class="seat_this"
+                  x="1970"
+                  y="1386"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 42號 -->
+                <image
+                  class="seat_this"
+                  x="1992"
+                  y="1382"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 44號 -->
+                <image
+                  class="seat_this"
+                  x="2016"
+                  y="1378"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 46號 -->
+                <image
+                  class="seat_this"
+                  x="2040"
+                  y="1374"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 48號 -->
+                <image
+                  class="seat_this"
+                  x="2064"
+                  y="1370"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 50號 -->
+                <image
+                  class="seat_this"
+                  x="2088"
+                  y="1366"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 22排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1936"
+                  y="1424"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 38號 -->
+                <image
+                  class="seat_this"
+                  x="1960"
+                  y="1420"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 40號 -->
+                <image
+                  class="seat_this"
+                  x="1984"
+                  y="1416"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 42號 -->
+                <image
+                  class="seat_this"
+                  x="2008"
+                  y="1412"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 44號 -->
+                <image
+                  class="seat_this"
+                  x="2030"
+                  y="1408"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 46號 -->
+                <image
+                  class="seat_this"
+                  x="2052"
+                  y="1404"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 48號 -->
+                <image
+                  class="seat_this"
+                  x="2074"
+                  y="1400"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 50號 -->
+                <image
+                  class="seat_this"
+                  x="2096"
+                  y="1396"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 52號 -->
+                <image
+                  class="seat_this"
+                  x="2130"
+                  y="1390"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 54號 -->
+                <image
+                  class="seat_this"
+                  x="2164"
+                  y="1386"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 23排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1922"
+                  y="1460"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 38號 -->
+                <image
+                  class="seat_this"
+                  x="1946"
+                  y="1456"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 40號 -->
+                <image
+                  class="seat_this"
+                  x="1970"
+                  y="1452"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 42號 -->
+                <image
+                  class="seat_this"
+                  x="1994"
+                  y="1448"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 44號 -->
+                <image
+                  class="seat_this"
+                  x="2016"
+                  y="1444"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 46號 -->
+                <image
+                  class="seat_this"
+                  x="2038"
+                  y="1440"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 48號 -->
+                <image
+                  class="seat_this"
+                  x="2060"
+                  y="1436"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 50號 -->
+                <image
+                  class="seat_this"
+                  x="2082"
+                  y="1432"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 52號 -->
+                <image
+                  class="seat_this"
+                  x="2104"
+                  y="1428"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 54號 -->
+                <image
+                  class="seat_this"
+                  x="2138"
+                  y="1422"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 56號 -->
+                <image
+                  class="seat_this"
+                  x="2176"
+                  y="1414"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 24排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1934"
+                  y="1490"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 38號 -->
+                <image
+                  class="seat_this"
+                  x="1956"
+                  y="1486"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 40號 -->
+                <image
+                  class="seat_this"
+                  x="1980"
+                  y="1482"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 42號 -->
+                <image
+                  class="seat_this"
+                  x="2002"
+                  y="1478"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 44號 -->
+                <image
+                  class="seat_this"
+                  x="2024"
+                  y="1474"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 46號 -->
+                <image
+                  class="seat_this"
+                  x="2048"
+                  y="1470"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 48號 -->
+                <image
+                  class="seat_this"
+                  x="2072"
+                  y="1466"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 50號 -->
+                <image
+                  class="seat_this"
+                  x="2096"
+                  y="1462"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 52號 -->
+                <image
+                  class="seat_this"
+                  x="2120"
+                  y="1458"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 54號 -->
+                <image
+                  class="seat_this"
+                  x="2152"
+                  y="1452"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 25排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1920"
+                  y="1522"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 38號 -->
+                <image
+                  class="seat_this"
+                  x="1942"
+                  y="1518"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 40號 -->
+                <image
+                  class="seat_this"
+                  x="1964"
+                  y="1514"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 42號 -->
+                <image
+                  class="seat_this"
+                  x="1988"
+                  y="1510"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 44號 -->
+                <image
+                  class="seat_this"
+                  x="2010"
+                  y="1506"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 46號 -->
+                <image
+                  class="seat_this"
+                  x="2032"
+                  y="1502"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 48號 -->
+                <image
+                  class="seat_this"
+                  x="2056"
+                  y="1498"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 50號 -->
+                <image
+                  class="seat_this"
+                  x="2080"
+                  y="1494"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 52號 -->
+                <image
+                  class="seat_this"
+                  x="2104"
+                  y="1490"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 54號 -->
+                <image
+                  class="seat_this"
+                  x="2128"
+                  y="1486"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 56號 -->
+                <image
+                  class="seat_this"
+                  x="2158"
+                  y="1480"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 26排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1930"
+                  y="1554"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 38號 -->
+                <image
+                  class="seat_this"
+                  x="1952"
+                  y="1550"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 40號 -->
+                <image
+                  class="seat_this"
+                  x="1974"
+                  y="1546"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 42號 -->
+                <image
+                  class="seat_this"
+                  x="1996"
+                  y="1542"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 44號 -->
+                <image
+                  class="seat_this"
+                  x="2018"
+                  y="1538"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 46號 -->
+                <image
+                  class="seat_this"
+                  x="2042"
+                  y="1534"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 48號 -->
+                <image
+                  class="seat_this"
+                  x="2066"
+                  y="1530"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 50號 -->
+                <image
+                  class="seat_this"
+                  x="2090"
+                  y="1526"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 52號 -->
+                <image
+                  class="seat_this"
+                  x="2112"
+                  y="1522"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 54號 -->
+                <image
+                  class="seat_this"
+                  x="2134"
+                  y="1518"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ 27排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1912"
+                  y="1588"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 38號 -->
+                <image
+                  class="seat_this"
+                  x="1936"
+                  y="1584"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 40號 -->
+                <image
+                  class="seat_this"
+                  x="1960"
+                  y="1580"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 42號 -->
+                <image
+                  class="seat_this"
+                  x="1984"
+                  y="1576"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 44號 -->
+                <image
+                  class="seat_this"
+                  x="2008"
+                  y="1572"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 46號 -->
+                <image
+                  class="seat_this"
+                  x="2030"
+                  y="1568"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 48號 -->
+                <image
+                  class="seat_this"
+                  x="2052"
+                  y="1564"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 50號 -->
+                <image
+                  class="seat_this"
+                  x="2074"
+                  y="1560"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 52號 -->
+                <image
+                  class="seat_this"
+                  x="2096"
+                  y="1556"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 54號 -->
+                <image
+                  class="seat_this"
+                  x="2118"
+                  y="1552"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 56號 -->
+                <image
+                  class="seat_this"
+                  x="2140"
+                  y="1548"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+
+                <!-- ★★★★★★★★★★★★ 輪椅席 -->
+                <!-- H2 -->
+                <image
+                  class="seat_this"
+                  x="1930"
+                  y="1114"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- H4 -->
+                <image
+                  class="seat_this"
+                  x="1966"
+                  y="1102"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- H6 -->
+                <image
+                  class="seat_this"
+                  x="2000"
+                  y="1090"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- H7 -->
+                <image
+                  class="seat_this"
+                  x="2030"
+                  y="1078"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- H10 -->
+                <image
+                  class="seat_this"
+                  x="2065"
+                  y="1066"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- H12 -->
+                <image
+                  class="seat_this"
+                  x="1930"
+                  y="780"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- H14 -->
+                <image
+                  class="seat_this"
+                  x="1966"
+                  y="768"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+
+                <!-- 區塊20 單 -->
+                <!-- ★★★★★★★★★★★★ 42排 -->
+                <!--  35號 -->
+                <image
+                  class="seat_this"
+                  x="830"
+                  y="2143"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!--  49號 -->
+                <image
+                  class="seat_this"
+                  x="662"
+                  y="2143"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- ★★★★★★★★★★★★ 54排 -->
+                <!--  31號 -->
+                <image
+                  class="seat_this"
+                  x="830"
+                  y="2515"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!--  51號 -->
+                <image
+                  class="seat_this"
+                  x="590"
+                  y="2515"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+
+                <!-- 區塊21 單 -->
+                <!-- ★★★★★★★★★★★★ 42排 -->
+                <!--  11號 -->
+                <image
+                  class="seat_this"
+                  x="1170"
+                  y="2143"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!--  33號 -->
+                <image
+                  class="seat_this"
+                  x="906"
+                  y="2143"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- ★★★★★★★★★★★★ 55排 -->
+                <!--  11號 -->
+                <image
+                  class="seat_this"
+                  x="1170"
+                  y="2546"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!--  25號 -->
+                <image
+                  class="seat_this"
+                  x="1002"
+                  y="2546"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+
+                <!-- 區塊22 單雙mix-->
+                <!-- ★★★★★★★★★★★★ 42排 -->
+                <!-- 1號  -->
+                <image
+                  class="seat_this"
+                  x="1356"
+                  y="2143"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 9號 -->
+                <image
+                  class="seat_this"
+                  x="1260"
+                  y="2143"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 10號 -->
+                <image
+                  class="seat_this"
+                  x="1476"
+                  y="2143"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- ★★★★★★★★★★★★ 51排 -->
+                <!-- 1號 -->
+                <image
+                  class="seat_this"
+                  x="1356"
+                  y="2422"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 9號 -->
+                <image
+                  class="seat_this"
+                  x="1260"
+                  y="2422"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 10號 -->
+                <image
+                  class="seat_this"
+                  x="1476"
+                  y="2422"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+
+                <!-- 區塊23 雙-->
+                <!-- ★★★★★★★★★★★★ 42排 -->
+                <!-- 12號 -->
+                <image
+                  class="seat_this"
+                  x="1566"
+                  y="2143"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 34號 -->
+                <image
+                  class="seat_this"
+                  x="1830"
+                  y="2143"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- ★★★★★★★★★★★★ 53排 -->
+                <!-- 12號 -->
+                <image
+                  class="seat_this"
+                  x="1566"
+                  y="2546"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 26號 -->
+                <image
+                  class="seat_this"
+                  x="1734"
+                  y="2546"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+
+                <!-- 區塊24 雙-->
+                <!-- ★★★★★★★★★★★★ 42排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1910"
+                  y="2143"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 50號 -->
+                <image
+                  class="seat_this"
+                  x="2078"
+                  y="2143"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- ★★★★★★★★★★★★ 54排 -->
+                <!-- 32號 -->
+                <image
+                  class="seat_this"
+                  x="1910"
+                  y="2515"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+                <!-- 52號 -->
+                <image
+                  class="seat_this"
+                  x="2150"
+                  y="2515"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                />
+
+                <!-- 區塊27 單 -->
+                <!-- ★★★★★★★★★★★★ B31排 -->
+                <!-- 37號 -->
+                <image
+                  class="seat_this"
+                  x="810"
+                  y="2632"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 47號 -->
+                <image
+                  class="seat_this"
+                  x="690"
+                  y="2632"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ B34排 -->
+                <!-- 37號 -->
+                <image
+                  class="seat_this"
+                  x="810"
+                  y="2730"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 47號 -->
+                <image
+                  class="seat_this"
+                  x="690"
+                  y="2730"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+
+                <!-- 區塊28 單 -->
+                <!-- ★★★★★★★★★★★★ B31排 -->
+                <!-- 13號 -->
+                <image
+                  class="seat_this"
+                  x="1155"
+                  y="2632"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 35號 -->
+                <image
+                  class="seat_this"
+                  x="891"
+                  y="2632"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ B35排 -->
+                <!-- 13號 -->
+                <image
+                  class="seat_this"
+                  x="1155"
+                  y="2756"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 29號 -->
+                <image
+                  class="seat_this"
+                  x="963"
+                  y="2756"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+
+                <!-- 區塊29 單雙mix-->
+                <!-- ★★★★★★★★★★★★ B31排 -->
+                <!-- 1號 -->
+                <image
+                  class="seat_this"
+                  x="1356"
+                  y="2632"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 11號 -->
+                <image
+                  class="seat_this"
+                  x="1240"
+                  y="2632"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 12號 -->
+                <image
+                  class="seat_this"
+                  x="1500"
+                  y="2632"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+
+                <!-- ★★★★★★★★★★★★ B35排 -->
+                <!-- 1號 -->
+                <image
+                  class="seat_this"
+                  x="1356"
+                  y="2756"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 11號 -->
+                <image
+                  class="seat_this"
+                  x="1240"
+                  y="2756"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 12號 -->
+                <image
+                  class="seat_this"
+                  x="1500"
+                  y="2756"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+
+                <!-- 區塊30 雙-->
+                <!-- ★★★★★★★★★★★★ B31排 -->
+                <!-- 14號 -->
+                <image
+                  class="seat_this"
+                  x="1586"
+                  y="2632"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1850"
+                  y="2632"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ B35排 -->
+                <!-- 14號 -->
+                <image
+                  class="seat_this"
+                  x="1586"
+                  y="2756"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 30號 -->
+                <image
+                  class="seat_this"
+                  x="1778"
+                  y="2756"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+
+                <!-- 區塊31 雙-->
+                <!-- ★★★★★★★★★★★★ B31排 -->
+                <!-- 38號 -->
+                <image
+                  class="seat_this"
+                  x="1924"
+                  y="2632"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 48號 -->
+                <image
+                  class="seat_this"
+                  x="2044"
+                  y="2632"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- ★★★★★★★★★★★★ B34排 -->
+                <!-- 38號 -->
+                <image
+                  class="seat_this"
+                  x="1924"
+                  y="2730"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+                <!-- 48號 -->
+                <image
+                  class="seat_this"
+                  x="2044"
+                  y="2730"
+                  xlink:href="images/seat_this.png"
+                  style="display: none"
+                ></image>
+              </svg>
+            </section>
+
+            <!--  -->
+            <h3 class="js_seat_zoom_in_title" style="display: none">
+              放大示意
+            </h3>
+            <section class="seatDisplay">
+              <!-- 地圖放大縮小 -->
+              <div class="zoom_out">縮小</div>
+              <div class="zoom_in">放大</div>
+
+              <!-- 座位圖 -->
+              <!-- viewBox = "min-x min-y width height" -->
+              <!-- min-x : 水平位移-->
+              <!-- min-y : 垂直位移-->
+              <!-- width : 圖片本人寬 -->
+              <!-- height : 圖片本人高  -->
+              <!-- 0 0 2800 3200 -->
+              <svg
+                id="svg"
+                class="js_svg_zoom_in"
+                xmlns="images/seat_map.jpg"
+                viewBox="700 900 1400 1800"
+                preserveAspectRatio="xMidYMid meet"
+                style="display: none"
+              >
+                <image class="seat_map" xlink:href="images/seat_map.jpg" />
+                <!-- 區塊12 單 -->
+                <!-- ★★★★★★★★★★★★ 28排 -->
+                <!--  35號 -->
+                <image
+                  class="seat_this"
+                  x="830"
+                  y="1665"
+                  xlink:href="images/seat_this.png"
+                />
+                <!--  49號 -->
+                <image
+                  class="seat_this"
+                  x="662"
+                  y="1665"
+                  xlink:href="images/seat_this.png"
+                />
+                <!-- ★★★★★★★★★★★★ 41排 -->
+                <!--  35號 -->
+                <image
+                  class="seat_this"
+                  x="830"
+                  y="2068"
+                  xlink:href="images/seat_this.png"
+                />
+                <!--  53號 -->
+                <image
+                  class="seat_this"
+                  x="614"
+                  y="2068"
+                  xlink:href="images/seat_this.png"
+                />
+
+                <!-- 區塊13 單 -->
+                <!-- ★★★★★★★★★★★★ 28排 -->
+                <!-- 11號 -->
+                <image
+                  class="seat_this"
+                  x="1170"
+                  y="1665"
+                  xlink:href="images/seat_this.png"
+                />
+                <!--  33號 -->
+                <image
+                  class="seat_this"
+                  x="906"
+                  y="1665"
+                  xlink:href="images/seat_this.png"
+                />
+                <!-- ★★★★★★★★★★★★ 41排 -->
+                <image
+                  class="seat_this"
+                  x="1170"
+                  y="2068"
+                  xlink:href="images/seat_this.png"
+                />
+                <!--  33號 -->
+                <image
+                  class="seat_this"
+                  x="906"
+                  y="2068"
+                  xlink:href="images/seat_this.png"
+                />
+
+                <!-- 區塊14 單雙mix -->
+                <!-- ★★★★★★★★★★★★ 28排 -->
+                <!-- 1號  -->
+                <image
+                  class="seat_this"
+                  x="1356"
+                  y="1665"
+                  xlink:href="images/seat_this.png"
+                />
+                <!-- 9號 -->
+                <image
+                  class="seat_this"
+                  x="1260"
+                  y="1665"
+                  xlink:href="images/seat_this.png"
+                />
+                <!-- 10號 -->
+                <image
+                  class="seat_this"
+                  x="1476"
+                  y="1665"
+                  xlink:href="images/seat_this.png"
+                />
+                <!-- ★★★★★★★★★★★★ 41排 -->
+                <!-- 1號 -->
+                <image
+                  class="seat_this"
+                  x="1356"
+                  y="2068"
+                  xlink:href="images/seat_this.png"
+                />
+                <!-- 9號 -->
+                <image
+                  class="seat_this"
+                  x="1260"
+                  y="2068"
+                  xlink:href="images/seat_this.png"
+                />
+                <!-- 10號 -->
+                <image
+                  class="seat_this"
+                  x="1476"
+                  y="2068"
+                  xlink:href="images/seat_this.png"
+                />
+
+                <!-- 區塊15 雙-->
+                <!-- ★★★★★★★★★★★★ 28排 -->
+                <!-- 12號 -->
+                <image
+                  class="seat_this"
+                  x="1566"
+                  y="1665"
+                  xlink:href="images/seat_this.png"
+                />
+                <!-- 34號 -->
+                <image
+                  class="seat_this"
+                  x="1830"
+                  y="1665"
+                  xlink:href="images/seat_this.png"
+                />
+                <!-- ★★★★★★★★★★★★ 41排 -->
+                <!-- 12號 -->
+                <image
+                  class="seat_this"
+                  x="1566"
+                  y="2068"
+                  xlink:href="images/seat_this.png"
+                />
+                <!-- 34號 -->
+                <image
+                  class="seat_this"
+                  x="1830"
+                  y="2068"
+                  xlink:href="images/seat_this.png"
+                />
+
+                <!-- 區塊16 雙-->
+                <!-- ★★★★★★★★★★★★ 28排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1910"
+                  y="1665"
+                  xlink:href="images/seat_this.png"
+                />
+                <!-- 50號 -->
+                <image
+                  class="seat_this"
+                  x="2078"
+                  y="1665"
+                  xlink:href="images/seat_this.png"
+                />
+                <!-- ★★★★★★★★★★★★ 41排 -->
+                <!-- 36號 -->
+                <image
+                  class="seat_this"
+                  x="1910"
+                  y="2068"
+                  xlink:href="images/seat_this.png"
+                />
+                <!-- 54號 -->
+                <image
+                  class="seat_this"
+                  x="2126"
+                  y="2068"
+                  xlink:href="images/seat_this.png"
+                />
+              </svg>
+            </section>
+
+            <!-- 舞台 - 座位篩選後 -->
+            <section class="seatDisplay" style="display: none">
+              <!-- 最近出口建議路線，跳窗 -->
+              <!-- <div class="exit"></div> -->
+
+              <!-- 地圖放大縮小 -->
+              <div class="zoom_in">放大</div>
+              <div class="zoom_out">縮小</div>
+
+              <!-- 座位篩選後，標註該方位 -->
+              <div>一般席2排3號</div>
+            </section>
+
+            <!-- content End -->
+          </div>
+        </div>
+      </div>
+      <!-- footer Start-->
+      <footer>
+        <div class="container">
+          <section>
+            <div class="col">
+              <!-- logo -->
+              <a href="#"><img src="images/ticc/bg-white.png" /></a>
+            </div>
+            <div class="col">
+              營運機構：中華民國對外貿易發展協會 (TAITRA)<br />
+              地址：11049 台北市信義路五段1號<br />
+              Email: ticc@taitra.org.tw<br />
+              傳真：(02)2723-2589<br />
+              總機：(02)2725-5200
+            </div>
+            <div class="col">
+              會議場地訂位分機: 3517,3518 / 服務台分機：3000,3151 /<br />
+              停車場分機：3040 / 餐飲服務分機：3350,3351<br />
+              婚宴專線：(02)2720-8008
+            </div>
+          </section>
+          <section>
+            <div class="col">
+              <!-- 標章2枚 -->
+              <img src="images/ticc/footer_logo1.png" alt="" />
+              <img src="images/ticc/footer_logo2.png" alt="" />
+            </div>
+            <div class="col">
+              <!-- 隱私權三連結＋版權 -->
+              <ul class="footer_link">
+                <li><a href="javascript:;">隱私權政策</a></li>
+                <li><a href="javascript:;">免責聲明</a></li>
+                <li><a href="javascript:;">友站連結</a></li>
+              </ul>
+              <p class="Copyright">
+                Taipei International Convention Center 版權所有
+              </p>
+            </div>
+          </section>
+        </div>
+      </footer>
+      <!-- footer End -->
+    </div>
+    <!-- 鯨魚 -->
+    <div class="abgne_float_game">
+      <a href="javascript:;"
+        ><img src="images/ticc/t-boHelper-ch.png" alt=""
+      /></a>
+    </div>
+    <a href="javascript:;" class="scrollToTop">回頁首</a>
+    <!-- JQ -->
+    <script src="js/jquery-3.6.0.min.js"></script>
+    <!-- 外掛 plugin js -->
+    <script src="vendor/jquery.easing.min.js"></script>
+    <!-- ease -->
+    <script src="vendor/slick/slick.min.js "></script>
+    <!-- slick -->
+    <script src="vendor/slick/slick-lightbox.js "></script>
+    <!-- slick lightbox -->
+    <script src="vendor/lazyload/lazyload.js"></script>
+    <!-- lazyload -->
+    <script src="vendor/picturefill/picturefill.min.js" async></script>
+    <!-- picturefill -->
+    <script src="vendor/scrolltable/jquery.scroltable.min.js"></script>
+    <!-- scrolltable -->
+    <!-- sticky-sidebar -->
+    <script src="vendor/sticky-sidebar/sticky-sidebar.js"></script>
+    <script src="vendor/sticky-sidebar/ResizeSensor.js"></script>
+    <!-- fancy -->
+    <script src="vendor/fancybox/jquery.fancybox.min.js"></script>
+    <!-- 瀑布流-->
+    <script src="vendor/gridloading/js/modernizr.custom.js"></script>
+    <script src="vendor/gridloading/js/masonry.pkgd.min.js"></script>
+    <script src="vendor/gridloading/js/imagesloaded.js"></script>
+    <script src="vendor/gridloading/js/classie.js"></script>
+    <script src="vendor/gridloading/js/AnimOnScroll.js"></script>
+    <!-- hyUI -->
+    <script src="js/hyui.js"></script>
+    <!-- 客製js -->
+    <script src="js/customize.js"></script>
+  </body>
+</html>
